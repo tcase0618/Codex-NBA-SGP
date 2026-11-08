@@ -269,6 +269,9 @@ def test_backtest_walk_forward_scoring(league):
     assert rep["players"]["stats"]["pts"]["n"] > 0
     path = B.save(wh, run, rep, out_dir=str(wh.path) + "-bt")
     assert path.exists()
+    assert rep["game"]["platt_live"]["games"] == len(ok)
+    assert B.latest_platt(wh) is None  # too few games to deploy a calibration layer
+    assert B.latest_platt(wh, "some-other-version") is None
 
 
 def test_intel_api(league):

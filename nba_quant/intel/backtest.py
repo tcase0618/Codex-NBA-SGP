@@ -104,7 +104,7 @@ def run(wh, start, end, sims=2000, seed=11, workers=4, progress=print, max_games
         for f in forecasts:
             if "error" not in f:
                 db.execute("INSERT OR REPLACE INTO model_predictions VALUES(?,?,?,?,?,?)", (
-                    f"{run_id}:{f['game_id']}", "possession-sim-1.0", f["game_id"], created, f["cutoff"], json.dumps(f)))
+                    f"{run_id}:{f['game_id']}", "possession-sim-1.1", f["game_id"], created, f["cutoff"], json.dumps(f)))
     return {"run_id": run_id, "created_at": created, "forecasts": forecasts, "start": start, "end": end, "sims": sims}
 
 
@@ -284,9 +284,12 @@ def load_forecasts(wh, run_id):
     return [json.loads(r["payload"]) for r in wh.query("SELECT payload FROM model_predictions WHERE id LIKE ?", (run_id + ":%",))]
 
 
-def latest_platt(wh):
-    """Most recent stored live Platt parameters, or None."""
-    for r in wh.query("SELECT payload FROM validation_results WHERE kind='walk_forward_backtest' ORDER BY created_at DESC"):
+def latest_platt(wh, model_version=None):
+    """Most recent stored live Platt parameters fitted on the given simulator
+    version (calibration is only valid for the model it was fitted on)."""
+    from .projection import SIM_VERSION
+    version = model_version or SIM_VERSION
+    for r in wh.query("SELECT payload FROM validation_results WHERE kind='walk_forward_backtest' AND model_version=? ORDER BY created_at DESC", (version,)):
         live = json.loads(r["payload"])["report"].get("game", {}).get("platt_live")
         if live and live["games"] >= 300:
             return live
@@ -300,10 +303,10 @@ def apply_platt(live, p):
 def save(wh, run, report, out_dir="output/backtest"):
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     payload = {"run_id": run["run_id"], "created_at": run["created_at"], "start": run["start"], "end": run["end"],
-               "sims_per_game": run["sims"], "model_version": "possession-sim-1.0", "report": report}
+               "sims_per_game": run["sims"], "model_version": "possession-sim-1.1", "report": report}
     with wh.connect() as db:
         db.execute("INSERT OR REPLACE INTO validation_results VALUES(?,?,?,?,?)", (
-            run["run_id"], run["created_at"], "walk_forward_backtest", "possession-sim-1.0", json.dumps(payload)))
+            run["run_id"], run["created_at"], "walk_forward_backtest", "possession-sim-1.1", json.dumps(payload)))
     path = Path(out_dir) / f"backtest-{run['run_id'][:8]}.json"
     path.write_text(json.dumps(payload, indent=1))
     return path

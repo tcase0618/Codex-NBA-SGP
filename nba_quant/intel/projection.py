@@ -21,7 +21,14 @@ from .sim import GameInputs, ZONES, simulate
 ZONE_KEYS = ("rim", "sm", "lm", "c3", "ab3")
 ZONE_DB = {"rim": "rim", "short_midrange": "sm", "long_midrange": "lm", "corner_three": "c3", "above_break_three": "ab3"}
 ZONE_PRIOR_K = {"rim": 50, "sm": 80, "lm": 80, "c3": 150, "ab3": 200}  # heavy shrinkage on threes
-SIM_VERSION = "possession-sim-1.0"
+SIM_VERSION = "possession-sim-1.1"
+# Walk-forward-tuned calibration of the simulator inputs (see docs, section 8):
+# STRENGTH_STRETCH widens the two teams' efficiency targets about their mean
+# (time-decayed ridge ratings shrink team differences); SCORE_EFFECT is the
+# logit change per 10-point lead that brings simulated margin spread down to
+# observed forecast residuals. Both were set on Dec 2025-Feb 2026 games only.
+STRENGTH_STRETCH = 1.17
+SCORE_EFFECT = 0.035
 COMBOS = {"pra": ("pts", "reb", "ast"), "pr": ("pts", "reb"), "pa": ("pts", "ast"), "ra": ("reb", "ast"),
           "stocks": ("stl", "blk"), "fg3m_pts": ("pts",)}
 THRESHOLDS = {"pts": [9.5, 14.5, 19.5, 24.5, 29.5, 34.5], "reb": [3.5, 5.5, 7.5, 9.5, 11.5], "ast": [2.5, 4.5, 6.5, 8.5, 10.5],
@@ -35,8 +42,10 @@ def _shrink(n, d, prior, k):
 
 
 class Projector:
-    def __init__(self, engine):
+    def __init__(self, engine, strength_stretch=None, score_effect=None):
         self.engine = engine
+        self.strength_stretch = STRENGTH_STRETCH if strength_stretch is None else strength_stretch
+        self.score_effect = SCORE_EFFECT if score_effect is None else score_effect
         self.wh = engine.wh
         self._cache = {}
 
@@ -316,10 +325,12 @@ class Projector:
             m["rapm_adjustment"] = {"offense": round(proj_o - base_o, 3), "defense": round(proj_d - base_d, 3)}
         target[0] += adj[0]["off"] - adj[1]["def"]
         target[1] += adj[1]["off"] - adj[0]["def"]
+        mid = (target[0] + target[1]) / 2
+        target = [mid + self.strength_stretch * (t - mid) for t in target]
         pace = th["pace"] * ta_["pace"] / tm["league_pace"]
         lg = dict(lg)
         lg["oreb_balance"] = league_oreb_balance(meta)
-        return {"inputs": GameInputs(teams, pace, league=lg, neutral=neutral), "meta": meta, "target_ortg": target,
+        return {"inputs": GameInputs(teams, pace, league=lg, neutral=neutral, score_effect=self.score_effect), "meta": meta, "target_ortg": target,
                 "pace": pace, "team_model": {"home": th, "away": ta_, "home_court_per100": hca, "league_ortg": tm["league_ortg"],
                                              "margin_sigma": tm["margin_sigma"], "trained_through": tm["trained_through"]},
                 "availability_model": {k: avail[k] for k in ("family", "trained_through", "note")}, "league": lg}
@@ -341,7 +352,8 @@ class Projector:
 
     def project(self, home, away, cutoff, sims=10000, seed=42, scenarios=None, tipoff=None, model_cutoff=None, pilot=1500):
         cutoff = M.iso(cutoff)
-        key = hashlib.sha256(json.dumps([home, away, cutoff, model_cutoff, sims, seed, scenarios or [], SIM_VERSION], sort_keys=True).encode()).hexdigest()[:24]
+        key = hashlib.sha256(json.dumps([home, away, cutoff, model_cutoff, sims, seed, scenarios or [], SIM_VERSION,
+                                         self.strength_stretch, self.score_effect], sort_keys=True).encode()).hexdigest()[:24]
         if key in self._cache:
             return self._cache[key]
         built = self.build_inputs(home, away, cutoff, scenarios, model_cutoff)

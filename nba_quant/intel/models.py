@@ -187,7 +187,8 @@ def fit_rapm(wh, cutoff, lam=3000.0, since=None, min_poss=0):
 
 
 # ---------------------------------------------------------------- team ratings
-def fit_team_ratings(wh, cutoff, lam=12.0, half_life_days=60.0, since=None):
+def fit_team_ratings(wh, cutoff, lam=12.0, half_life_days=120.0, since=None):
+    # lam/half-life chosen by walk-forward grid search (tuned Dec-Feb 2025-26; validated Mar-Jun and 2026-27).
     cutoff = iso(cutoff)
     params = [cutoff]
     sql = """SELECT id, tipoff, home_id, away_id, home_score, away_score, home_poss, away_poss, neutral_site, periods

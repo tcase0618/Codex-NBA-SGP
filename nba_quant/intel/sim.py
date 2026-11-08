@@ -81,12 +81,17 @@ class GameInputs:
     """Validated per-team arrays. `teams` is [home, away]; each a dict with list
     fields per player (see projection.build_inputs)."""
 
-    def __init__(self, teams, pace, shifts=(0.0, 0.0), league=None, neutral=False):
+    def __init__(self, teams, pace, shifts=(0.0, 0.0), league=None, neutral=False, score_effect=0.0):
         self.teams = teams
         self.pace = float(pace)
         self.shifts = list(shifts)
         self.league = league or {}
         self.neutral = neutral
+        # Score effect: logit change in make probability per 10 points of lead
+        # (negative for the leader). Captures leaders easing off / trailers pressing,
+        # which independent possessions miss; tuned so simulated margin spread
+        # matches observed forecast residuals.
+        self.score_effect = float(score_effect)
 
 
 def simulate(inp: GameInputs, sims=10000, seed=42, trace=False, max_ot=10):
@@ -240,7 +245,8 @@ def simulate(inp: GameInputs, sims=10000, seed=42, trace=False, max_ot=10):
                 si = np.nonzero(shot)[0]
                 a = actor[si]
                 zone = _pick(rng, o["zone_mix"][a])
-                logit = o["zone_logit"][a, zone] + d["def_adj"][zone] + shift
+                lead = score[ii[si], side] - score[ii[si], 1 - side]
+                logit = o["zone_logit"][a, zone] + d["def_adj"][zone] + shift - inp.score_effect * lead / 10.0
                 p = 1 / (1 + np.exp(-logit))
                 made = rng.random(len(si)) < p
                 three = zone >= 3

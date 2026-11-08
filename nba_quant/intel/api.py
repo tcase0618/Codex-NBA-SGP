@@ -220,6 +220,11 @@ def register(app, db_path=None):
             try:
                 out = st.projector.project(req.home_id, req.away_id, cutoff, sims=req.simulations, seed=req.seed,
                                            scenarios=[s.model_dump() for s in req.scenarios], tipoff=req.tipoff)
+                from .backtest import apply_platt, latest_platt
+                live = latest_platt(st.wh)
+                out["calibrated_home_win_probability"] = apply_platt(live, out["home_win_probability"])
+                out["calibration_source"] = ({"method": "Platt scaling fitted on walk-forward backtest forecasts",
+                                              "games": live["games"], "trained_through": live["trained_through"]} if live else None)
                 names = {t["id"]: t for t in st.wh.query("SELECT * FROM teams")}
                 out["home"], out["away"] = names.get(req.home_id), names.get(req.away_id)
                 job.update(status="done", result=out, seconds=round(time.time() - t0, 2))

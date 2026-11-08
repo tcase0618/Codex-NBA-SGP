@@ -438,7 +438,7 @@ function renderPredict() {
   const homeP = r.players.filter((p) => p.team_id === r.home_id && p.played_prob > 0.02), awayP = r.players.filter((p) => p.team_id === r.away_id && p.played_prob > 0.02);
   el.innerHTML = `<div class="grid g6" style="margin-bottom:12px">
       <div class="card"><div class="l">Projected score</div><div class="v gold">${A} ${fmt(ta.points.mean, 1)} – ${fmt(th.points.mean, 1)} ${H}</div><div class="s">median ${fmt(ta.points.median, 0)}–${fmt(th.points.median, 0)}</div></div>
-      <div class="card"><div class="l">${H} win probability</div><div class="v blue">${pct(r.home_win_probability)}</div><div class="s">MC ±${(196 * r.win_probability_mc_se).toFixed(2)} pp (95%)</div></div>
+      <div class="card"><div class="l">${H} win probability</div><div class="v blue">${pct(r.calibrated_home_win_probability ?? r.home_win_probability)}</div><div class="s">${r.calibrated_home_win_probability != null ? `calibrated · raw sim ${pct(r.home_win_probability)}` : "raw sim (no calibration fit)"} · MC ±${(196 * r.win_probability_mc_se).toFixed(2)} pp</div></div>
       <div class="card"><div class="l">Expected margin (${H})</div><div class="v">${signed(r.margin.mean)}</div><div class="s">80%: ${fmt(r.margin.p10, 0)} to ${fmt(r.margin.p90, 0)}</div></div>
       <div class="card"><div class="l">Total points</div><div class="v">${fmt(r.total.mean)}</div><div class="s">80%: ${fmt(r.total.p10, 0)}–${fmt(r.total.p90, 0)}</div></div>
       <div class="card"><div class="l">Pace / OT</div><div class="v">${fmt(r.pace)}</div><div class="s">OT ${pct(r.overtime_probability)}</div></div>
@@ -458,6 +458,7 @@ function renderPredict() {
       <div class="panel"><h2>Run provenance</h2><div class="kv mono">
         <span>Simulations</span><span>${r.simulations.toLocaleString()} (seed ${r.seed})</span><span>Sim time</span><span>${fmt(r.seconds, 2)} s · wall ${fmt(r.wall, 1)} s</span>
         <span>Info cutoff</span><span>${esc(r.cutoff)}</span><span>Team model through</span><span>${esc(r.team_model.trained_through)}</span>
+        <span>Win-prob calibration</span><span>${r.calibration_source ? `Platt, ${r.calibration_source.games} walk-forward games through ${esc(r.calibration_source.trained_through)}` : "none stored"}</span>
         <span>Calibration shift (logit)</span><span>${r.calibration.shifts.map((x) => signed(x, 3)).join(" / ")}</span>
         <span>Accounting identities</span><span class="${checks ? "pos" : "neg"}">${checks ? "PASS (points, minutes, assists, steals, blocks)" : "FAIL"}</span>
         <span>Scenarios</span><span>${r.scenarios.length}</span><span>Version</span><span>${esc(r.version)} · key ${esc(r.key)}</span></div>

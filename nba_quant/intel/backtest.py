@@ -198,6 +198,9 @@ def score(wh, forecasts):
             "total_80_coverage": _mean([r["f"]["total"]["p10"] <= r["total"] <= r["f"]["total"]["p90"] for r in rows]),
         },
     }
+    # Live recalibration parameters: Platt fit on all scored forecasts (applied only to future games).
+    game["platt_live"] = {"weights": [round(float(x), 5) for x in _platt_fit(p, y)], "games": len(rows),
+                          "trained_through": rows[-1]["f"]["tipoff"]}
     cal = [r for r in rows if r["p_cal"] is not None]
     if cal:
         pc, yc = np.array([r["p_cal"] for r in cal]), np.array([r["y"] for r in cal])
@@ -275,6 +278,23 @@ def score(wh, forecasts):
 def _mean(x):
     x = list(x)
     return round(float(np.mean(x)), 4) if x else None
+
+
+def load_forecasts(wh, run_id):
+    return [json.loads(r["payload"]) for r in wh.query("SELECT payload FROM model_predictions WHERE id LIKE ?", (run_id + ":%",))]
+
+
+def latest_platt(wh):
+    """Most recent stored live Platt parameters, or None."""
+    for r in wh.query("SELECT payload FROM validation_results WHERE kind='walk_forward_backtest' ORDER BY created_at DESC"):
+        live = json.loads(r["payload"])["report"].get("game", {}).get("platt_live")
+        if live and live["games"] >= 300:
+            return live
+    return None
+
+
+def apply_platt(live, p):
+    return round(_platt_apply(live["weights"], p), 4) if live else None
 
 
 def save(wh, run, report, out_dir="output/backtest"):

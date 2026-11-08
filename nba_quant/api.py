@@ -443,5 +443,7 @@ def create_app(db_path=None):
     def entity_profiles(dataset_id: str, cutoff: str | None = None):
         return profiles(get_dataset(store, dataset_id), utc(cutoff) if cutoff else datetime.now(timezone.utc))
 
+    from .intel.api import register as register_intel
+    register_intel(app)
     app.mount("/", StaticFiles(directory=Path(__file__).with_name("static"), html=True), name="dashboard")
     return app

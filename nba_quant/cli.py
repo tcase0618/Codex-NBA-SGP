@@ -1,3 +1,4 @@
+import os
 import argparse
 import json
 from datetime import datetime, timedelta, timezone
@@ -60,6 +61,7 @@ def main():
     if args.command == "serve":
         import uvicorn
         from .api import create_app
+        os.environ.setdefault("NBA_INTEL_WARM", "1")
         uvicorn.run(create_app(args.db), host="127.0.0.1", port=args.port)
         return
     store = Store(args.db)

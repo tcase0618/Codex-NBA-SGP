@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070b14">
+  <title>Case NBA Quant Terminal</title>
+  <link rel="stylesheet" href="/terminal.css">
+  <script defer src="/terminal.js"></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><div class="brand-mark">C</div><div><b>CASE NBA QUANT</b><small>INTELLIGENCE TERMINAL</small></div></div>
+    <div class="nav-label">WORKSPACES</div>
+    <nav class="nav" id="nav">
+      <button data-ws="player" class="active"><span class="k">A</span>Player intelligence</button>
+      <button data-ws="team"><span class="k">B</span>Team intelligence</button>
+      <button data-ws="lineup"><span class="k">C</span>Lineup laboratory</button>
+      <button data-ws="matchup"><span class="k">D</span>Matchup laboratory</button>
+      <button data-ws="predict"><span class="k">E</span>Prediction engine</button>
+      <button data-ws="audit"><span class="k">F</span>Model audit</button>
+    </nav>
+    <div class="nav-label">SEASON</div>
+    <select id="season" aria-label="Season" style="width:100%"></select>
+    <div class="side-foot">
+      <div>Data: ESPN public play-by-play (secondary provider). No optical tracking. No LLM at runtime.</div>
+      <a href="/">SGP research workspace →</a>
+      <a href="/api/intel/catalog" target="_blank" rel="noopener">Metric definitions (JSON) →</a>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="crumbs">CASE CAPITAL / NBA / <b id="crumb">PLAYER INTELLIGENCE</b></div>
+      <div class="status-row" id="status-row"><span class="chip"><span class="dot"></span>connecting…</span></div>
+    </header>
+    <div class="content">
+      <div id="banner"></div>
+
+      <!-- A: Player -->
+      <section class="ws active" id="ws-player">
+        <h1>Player <span class="accent">intelligence</span></h1>
+        <p class="sub">100 universal metrics, positional specializations, multi-label archetypes, shot quality and next-game projection.</p>
+        <div class="controls">
+          <label class="f search">Player<input id="p-search" placeholder="Search any player…" autocomplete="off"><div class="suggest" id="p-suggest" hidden></div></label>
+          <label class="f">Show<select id="p-show"><option value="avail">Measured metrics</option><option value="all">All slots incl. unavailable</option></select></label>
+        </div>
+        <div id="p-body"><div class="empty">Search for a player to load the profile.</div></div>
+      </section>
+
+      <!-- B: Team -->
+      <section class="ws" id="ws-team">
+        <h1>Team <span class="accent">intelligence</span></h1>
+        <p class="sub">240-slot metric explorer across 20 categories with league ranks, filters, rolling efficiency and lineup context.</p>
+        <div class="controls">
+          <label class="f">Team<select id="t-team"></select></label>
+          <label class="f">Venue<select id="t-venue"><option value="">All</option><option value="home">Home</option><option value="away">Away</option></select></label>
+          <label class="f">Last N games<select id="t-last"><option value="">Season</option><option>5</option><option>10</option><option>20</option></select></label>
+          <label class="f">Opponent<select id="t-opp"><option value="">All</option></select></label>
+          <label class="f">Show<select id="t-show"><option value="avail">Measured metrics</option><option value="all">All slots</option></select></label>
+          <button class="btn primary" id="t-load">Load →</button>
+        </div>
+        <div id="t-body"><div class="empty">Choose a team.</div></div>
+      </section>
+
+      <!-- C: Lineups -->
+      <section class="ws" id="ws-lineup">
+        <h1>Lineup <span class="accent">laboratory</span></h1>
+        <p class="sub">Five-man units from reconstructed stints. Adjusted net shrinks observed results toward summed player RAPM; interaction is the chemistry residual.</p>
+        <div class="controls">
+          <label class="f">Team<select id="l-team"></select></label>
+          <label class="f">Must include<select id="l-inc"><option value="">Anyone</option></select></label>
+          <label class="f">Without (injury scenario)<select id="l-exc"><option value="">Nobody</option></select></label>
+          <label class="f">Min possessions<input id="l-min" type="number" value="25" min="0" step="5" style="width:90px"></label>
+          <label class="f">Sort<select id="l-sort"><option value="minutes">Minutes</option><option value="adjusted_net">Adjusted net</option><option value="net">Raw net</option><option value="interaction">Interaction</option></select></label>
+          <button class="btn primary" id="l-load">Load →</button>
+        </div>
+        <div id="l-body"><div class="empty">Choose a team.</div></div>
+      </section>
+
+      <!-- D: Matchup -->
+      <section class="ws" id="ws-matchup">
+        <h1>Matchup <span class="accent">laboratory</span></h1>
+        <p class="sub">Offense-versus-defense by shot zone, four factors, shot quality and key players against the opponent's zone defense.</p>
+        <div class="controls">
+          <label class="f">Home<select id="m-home"></select></label>
+          <label class="f">Away<select id="m-away"></select></label>
+          <button class="btn primary" id="m-load">Compare →</button>
+          <button class="btn" id="m-to-predict">Send to prediction engine →</button>
+        </div>
+        <div id="m-body"><div class="empty">Choose two teams.</div></div>
+      </section>
+
+      <!-- E: Prediction -->
+      <section class="ws" id="ws-predict">
+        <h1>Prediction <span class="accent">engine</span></h1>
+        <p class="sub">Possession-level simulation. Player boxes, team scores and the winner come from the same simulated events.</p>
+        <div class="panel" style="margin-bottom:12px">
+          <div class="panel-head"><h2>Schedule</h2><div class="controls" style="margin:0"><input id="e-day" type="date"><button class="btn small" id="e-day-load">Load day</button></div></div>
+          <div id="e-schedule" class="muted">Loading schedule…</div>
+        </div>
+        <div class="controls">
+          <label class="f">Home<select id="e-home"></select></label>
+          <label class="f">Away<select id="e-away"></select></label>
+          <label class="f">Simulations<select id="e-sims"><option>1000</option><option selected>10000</option><option>50000</option></select></label>
+          <label class="f">Seed<input id="e-seed" type="number" value="42" style="width:90px"></label>
+          <label class="f">Information cutoff (UTC, optional)<input id="e-cutoff" type="datetime-local"></label>
+          <button class="btn" id="e-roster">Edit availability ▾</button>
+          <button class="btn primary" id="e-run">Run simulation →</button>
+        </div>
+        <div id="e-scen" hidden class="panel" style="margin-bottom:12px"></div>
+        <div id="e-body"><div class="empty">Pick a game from the schedule or choose two teams.</div></div>
+      </section>
+
+      <!-- F: Audit -->
+      <section class="ws" id="ws-audit">
+        <h1>Model <span class="accent">audit</span></h1>
+        <p class="sub">Walk-forward evidence only. Nothing here is a training-set fit.</p>
+        <div id="f-body"><div class="empty">Loading…</div></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

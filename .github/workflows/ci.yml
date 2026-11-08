@@ -26,6 +26,8 @@ jobs:
       - name: Test source, forecasts and research selection
         run: python -m pytest -q
       - name: Check JavaScript
-        run: node --check nba_quant/static/app.js
+        run: |
+          node --check nba_quant/static/app.js
+          node --check nba_quant/static/terminal.js
       - name: Check dashboard behavior with isolated fixtures
         run: python scripts/check_dashboard.py

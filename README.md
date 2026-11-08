@@ -4,6 +4,19 @@ A source-aware NBA research terminal with a same-game combination builder, AutoG
 
 **Research status:** model agreement is a screening heuristic, not a calibrated hit probability or guaranteed win. No model is currently approved for production wagering. Public Polymarket reads provide individual contracts, not a quoted combined SGP payout. Historical observations, forecasts and synthetic demonstrations remain distinct.
 
+## Intelligence terminal (play-by-play platform)
+
+`/terminal` serves the **Case NBA Quant Intelligence Platform**. It covers player, team, lineup and matchup intelligence, a vectorized possession simulator (1k/10k/50k sims), and walk-forward model audit. It is built on reconstructed ESPN play-by-play: possessions, five-man stints, shot coordinates, RAPM and xFG. Data and models never leave the machine, and no LLM runs at runtime.
+
+```bash
+python -m nba_quant.intel acquire 2025-10-21 2026-06-25   # cache ESPN summaries
+python -m nba_quant.intel build                           # build output/warehouse.sqlite
+python -m nba_quant serve --port 8020                     # open http://127.0.0.1:8020/terminal
+python -m nba_quant.intel backtest 2025-11-17T12:00Z 2026-06-25T00:00Z
+```
+
+See [docs/INTELLIGENCE-PLATFORM.md](docs/INTELLIGENCE-PLATFORM.md) for the audit, architecture, metric classes, validation protocol, measured results and limitations.
+
 ## Quick start
 
 ```powershell

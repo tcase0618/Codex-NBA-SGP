@@ -1,0 +1,969 @@
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 1
+NBA QUANT
+Unified Player & Team Intelligence + Game Prediction Engine
+Combined blueprint containing the two preceding NBA frameworks: the statistical player/team intelligence
+architecture and the probabilistic engine for projecting player box scores, final scores, and game winners.
+Document scope: 100 universal player metric slots; 20 position-specific metric slots for each of PG, SG, SF, PF and
+C; 240 team metric slots across 20 categories; a seven-layer prediction framework; possession simulation;
+validation; and a staged build roadmap.
+Important: This is a system-design specification, not an empirical study or a set of actual NBA forecasts. Some proposed metrics
+require licensed optical tracking, custom event charting, or model estimation. Any sample predictions below are explicitly fictional.
+Contents
+PART A — NBA player and team intelligence
+A1. Position philosophy and universal player analytics
+A2. Five position-specific metric modules
+A3. Twenty team intelligence categories
+A4. Model-data infrastructure and team/player integration
+PART B — Predictive intelligence engine
+B1. Seven modeling layers and minutes forecasts
+B2. Opportunity, shooting, assists and rebounds
+B3. Team scoring, game winners, and possession simulation
+B4. Uncertainty, lineups, matchup intelligence and validation
+B5. Deployment blueprint and operational outputs
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 2
+PART A — PLAYER & TEAM INTELLIGENCE
+The NBA version uses possession-level analysis, shot quality, individual matchups, rotations, and five-man lineup
+chemistry. Each player has universal measures plus role-specific modules; every franchise has a team profile and
+an opponent-adjusted matchup profile. These feed into a shared probabilistic prediction system.
+A1. Position-by-position primary variables
+Positi
+on
+Core skill focus
+Next-game forecast drivers
+PG
+Creation efficiency; assist quality; turnover-adjusted
+playmaking
+Touches, time of possession, potential assists, teammates
+SG
+Scoring efficiency; self-created shot quality; 3PT shot
+making
+Shot volume, 3PA, shot difficulty, expected minutes
+SF
+Two-way impact; versatility; wing scoring and defense
+Assignments, off-ball role, transition opportunities
+PF
+Defensive versatility; rebounding; spacing; finishing
+Matchup size, rim chances, lineup role
+C
+Rim protection; screening; interior efficiency;
+rebounding
+Paint touches, contest chances, P&R involvement
+NBA players frequently cross traditional position labels. A primary position should be supplemented with functional
+archetypes: primary initiator, secondary creator, pull-up shooter, spot-up shooter, slasher, wing stopper, stretch
+big, roll man, offensive hub, and rim protector.
+A2. Universal player analytics — 100 metric slots
+1. Scoring production
+Points / game
+Points / 36 minutes
+Points / 100 possessions
+Field goals attempted / 100
+Free throws attempted / 100
+2PT points / 100
+3PT points / 100
+Paint points / 100
+Transition points / 100
+Second-chance points / 100
+2. Shooting efficiency
+True shooting %
+Effective FG%
+2PT FG%
+3PT FG%
+FT%
+Rim FG%
+Midrange FG%
+Corner 3PT%
+Above-break 3PT%
+Expected eFG% differential
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 3
+3. Shot profile and difficulty
+Rim attempt share
+Midrange attempt share
+3PA share
+Pull-up attempt share
+Catch-and-shoot share
+Contested shot rate
+Tightly defended shot rate
+Average shot distance
+Expected points / shot
+Shot quality-adjusted scoring
+4. Playmaking and passing
+Assists / 100
+Potential assists
+Assist points created
+Assist-to-turnover ratio
+Passes made / game
+Secondary assists
+Drive-and-kick passes
+Assist conversion rate
+Expected assists
+Passing turnovers / 100
+5. Ball handling and usage
+Usage rate
+Touches / game
+Frontcourt touches
+Time of possession
+Average seconds / touch
+Dribbles / touch
+Turnover rate
+Bad-pass turnover rate
+Lost-ball turnover rate
+Touches ending in advantage creation
+6. Rebounding
+Offensive rebound %
+Defensive rebound %
+Total rebound %
+Rebound chances
+Rebound conversion %
+Contested rebound %
+Uncontested rebound %
+Boxouts / 100
+Second-chance points created
+Rebound positioning over expected
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 4
+7. Defense
+Defensive possessions
+Matchup-adjusted points allowed
+Deflections / 100
+Steals / 100
+Blocks / 100
+Contested shots / 100
+Opponent rim FG%
+Fouls / 100
+Defensive rebounds secured
+Defensive impact estimate
+8. Athleticism and movement
+Distance traveled / game
+Average movement speed
+Average offensive speed
+Average defensive speed
+Sprint frequency
+Transition speed
+Acceleration events
+Deceleration events
+High-speed distance
+Movement-load estimate
+9. Overall value and impact
+On-court offensive rating
+On-court defensive rating
+On-court net rating
+On/off net rating differential
+Adjusted plus-minus estimate
+Regularized adjusted plus-minus
+Offensive impact estimate
+Defensive impact estimate
+Estimated wins above replacement
+Impact estimate uncertainty
+10. Consistency and availability
+Minutes / game
+Minutes variance
+Games played
+Games missed
+Last 5 games usage
+Last 10 games TS%
+Game scoring variance
+Foul trouble frequency
+Projected next-game minutes
+Availability-adjusted projected impact
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 5
+A3. Position-specific player modules — 20 each
+Point guard — 20 specialized metrics
+Offensive creation and decision-making
+Potential assists / 100
+Expected assist value
+High-value passes created
+Paint-touch creation rate
+Drive penetration rate
+Drive assist %
+Drive turnover %
+Pick-and-roll handler PPP
+Isolation PPP
+Late-clock creation PPP
+Control, pressure and adaptability
+Ball pressure turnover rate
+Blitz/trap escape rate
+PnR switch efficiency
+Drop coverage efficiency
+Hedge coverage efficiency
+Passing versus traps
+Possession control index
+Offense efficiency while initiating
+Clutch creation efficiency
+Advantage creation / touch
+Most informative concepts: Expected assist value, turnover-adjusted creation, pick-and-roll efficiency and
+paint-touch creation.
+Shooting guard — 20 specialized metrics
+Shot creation and scoring
+Pull-up 3PT%
+Pull-up 3PA / 100
+Catch-and-shoot 3PT%
+Off-screen shooting PPP
+Isolation scoring PPP
+Step-back shooting efficiency
+Tight-coverage shooting %
+Expected shot difficulty
+Shot making above expected
+Self-created scoring share
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 6
+Off-ball movement and defense
+Movement shooting efficiency
+Relocation 3PT%
+Spot-up PPP
+Off-ball gravity estimate
+Closeout attack PPP
+Secondary creation assists
+Perimeter matchup difficulty
+Screen navigation success
+Opponent guard scoring efficiency
+Transition scoring PPP
+Most informative concepts: Shot making above expected, pull-up three volume and quality, off-screen scoring and
+gravity.
+Small forward — 20 specialized metrics
+Wing offense and versatility
+Wing isolation PPP
+Spot-up PPP
+Cut scoring PPP
+Transition PPP
+Post-up versus smaller defenders
+Catch-and-shoot 3PT%
+Closeout attack efficiency
+Rim finishing through contact
+Secondary playmaking index
+Off-ball gravity estimate
+Wing defense
+Defensive matchup difficulty
+1-on-1 containment %
+Opponent isolation PPP
+On-ball turnover creation
+Screen navigation success
+Closeout contest efficiency
+Defensive switch success
+Perimeter recovery ability
+Help defense disruption
+Wing defensive versatility index
+Most informative concepts: Two-way impact, isolation containment, assignment difficulty and versatile scoring.
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 7
+Power forward — 20 specialized metrics
+Frontcourt offense
+Stretch 4 three-point rate
+Pick-and-pop PPP
+Pick-and-roll screener PPP
+Screen assists / 100
+Post-up PPP
+Cutting PPP
+Putback PPP
+Rim finishing above expected
+Offensive rebound chance %
+Mismatch scoring efficiency
+Frontcourt defense
+Switch defense efficiency
+Rim contest frequency
+Defensive FG% at rim
+Weak-side block rate
+Help rotation success
+Defensive rebound chance %
+Boxout success %
+Pick-and-roll defensive efficiency
+Interior matchup containment
+Small-ball center efficiency
+Most informative concepts: Switch defense, spacing, rim finishing, screen value and rebounding.
+Center — 20 specialized metrics
+Interior offense and rebounding
+Rim FG%
+Rim FG% above expected
+Dunk frequency
+Post-up PPP
+Roll-man PPP
+Paint touches / 100
+Screen assists / 100
+Offensive rebound chance conversion
+Putback PPP
+Post-up passing value
+Rim protection and defensive schemes
+Defensive FG% at rim
+Rim FG% suppressed vs expected
+Rim deterrence rate
+Blocks / contest
+Drop coverage PPP allowed
+Switch coverage PPP allowed
+Pick-and-roll roll-man defense
+Defensive rebound chance conversion
+Foul rate on rim contests
+Interior defensive impact
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 8
+Most informative concepts: Rim deterrence and suppression, rebound-chance conversion and P&R; defensive
+efficiency.
+A4. Team intelligence — 240 metric slots
+All 30 teams receive 20 categories with 12 planned metric slots each. The profile is designed to isolate shot quality,
+play-type efficiency, lineups and context rather than overemphasizing raw per-game totals.
+1. Overall team efficiency
+Offensive rating
+Defensive rating
+Net rating
+Adjusted net rating
+Pace
+Points / game
+Points allowed / game
+Point differential
+Expected wins
+Strength of schedule
+Halfcourt net rating
+Transition net rating
+2. Shooting efficiency
+Team TS%
+Team eFG%
+2PT%
+3PT%
+FT%
+Rim FG%
+Midrange FG%
+Corner 3PT%
+Above-break 3PT%
+Catch-and-shoot eFG%
+Pull-up eFG%
+Shot making vs expected
+3. Shot selection and quality
+Rim attempt rate
+Short midrange attempt rate
+Long midrange rate
+Corner three attempt rate
+Above-break 3PA rate
+Expected eFG%
+Expected points / shot
+Average shot distance
+Open shot rate
+Wide-open shot rate
+Contested shot rate
+Shot profile efficiency
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 9
+4. Halfcourt offense
+Halfcourt points / possession
+Isolation PPP
+PnR handler PPP
+PnR roll-man PPP
+Spot-up PPP
+Post-up PPP
+Cutting PPP
+Off-screen PPP
+Handoff PPP
+Putback PPP
+Halfcourt turnover rate
+Halfcourt shot quality
+5. Ball movement and creation
+Assists / 100
+Assist rate
+Potential assists / 100
+Secondary assists / 100
+Passes per game
+Passes per possession
+Drive-and-kick rate
+Paint touches / 100
+Assist points created
+Expected assists
+Time of possession concentration
+Ball movement efficiency
+6. Transition offense
+Transition frequency
+Transition PPP
+Fast-break points / 100
+Live-ball turnover transition rate
+Defensive rebound to shot time
+Transition eFG%
+Transition rim attempt rate
+Transition 3PA rate
+Early offense frequency
+Early offense PPP
+Transition turnover rate
+Transition foul-draw rate
+7. Offensive rebounding
+Offensive rebound %
+Offensive rebound chances
+OREB conversion %
+Contested OREB %
+Second-chance points / 100
+Second-chance PPP
+Putback PPP
+Rebound-to-kickout 3PA
+Opponent boxout disruption
+Crash frequency
+OREB after three-point misses
+OREB after rim misses
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 10
+8. Turnovers and free throws
+Turnover %
+Live-ball TOV%
+Dead-ball TOV%
+Bad-pass TOV%
+Lost-ball TOV%
+Points conceded off turnovers
+Free throw attempt rate
+Free throw conversion %
+Shooting fouls drawn / 100
+And-one frequency
+Offensive foul rate
+Turnover-adjusted efficiency
+9. Overall defense
+Defensive rating
+Adjusted defensive rating
+Opponent eFG%
+Opponent TS%
+Turnover rate forced
+Opponent offensive rebound %
+Opponent free throw rate
+Defensive possession length
+Halfcourt defensive rating
+Transition defensive rating
+Opponent shot quality
+Defensive points above expected
+10. Perimeter defense
+Opponent 3PA rate
+Opponent 3PT%
+Opponent corner 3PA rate
+Opponent catch-and-shoot eFG%
+Opponent pull-up eFG%
+Open threes allowed
+Wide-open threes allowed
+Perimeter contests / 100
+Closeout quality estimate
+Perimeter deflections / 100
+Opponent drive penetration rate
+Opponent wing isolation PPP
+11. Interior and rim defense
+Opponent rim attempt rate
+Opponent FG% at rim
+Opponent rim FG% vs expected
+Paint points allowed / 100
+Blocks / 100
+Rim contests / 100
+Rim deterrence estimate
+Opponent roll-man PPP
+Opponent post-up PPP
+Help rotation quality
+Fouls on rim attempts
+Interior defensive PPP
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 11
+12. Defensive scheme
+Drop coverage frequency
+Switch frequency
+Hedge frequency
+Blitz frequency
+Zone defense frequency
+Man-to-man frequency
+PnR handler PPP allowed
+Roll-man PPP allowed
+Isolation PPP allowed
+Post-up PPP allowed
+Defensive rotation error rate
+Scheme adaptability estimate
+13. Defensive rebounding
+Defensive rebound %
+Defensive rebound chances
+DREB chance conversion %
+Contested DREB %
+Boxouts / 100
+Opponent second-chance points
+Opponent putback PPP
+Long-rebound recovery %
+Rebounds after missed threes
+Rebounds after missed twos
+Opponent offensive rebound %
+Defensive possession completion rate
+14. Lineup combinations
+Starting five net rating
+Best five-man adjusted net
+Worst five-man adjusted net
+Bench lineup net rating
+Small-ball lineup net
+Double-big lineup net
+Lineup offensive rating
+Lineup defensive rating
+Lineup effective FG%
+Lineup rebounding %
+Lineup possession count
+Lineup chemistry estimate
+15. Player dependencies
+Star player on/off net
+Primary creator on/off offense
+Center on/off rim defense
+Top shooter on/off spacing
+Top stopper on/off defense
+Bench creation efficiency
+Usage redistribution after absence
+Assist redistribution
+Lineup replacement net
+Injury-adjusted team rating
+Star usage concentration
+Rotation continuity
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 12
+16. Coaching and rotations
+Average rotation length
+Starter minutes share
+Bench minutes share
+Substitution timing
+Timeout usage frequency
+After-timeout offensive PPP
+After-timeout defensive PPP
+Quarter-opening lineup net
+Foul-trouble adjustment
+Late-game lineup efficiency
+Scheme frequency change
+Rotation-adjusted net rating
+17. Game state and clutch
+First-quarter net rating
+Second-quarter net rating
+Third-quarter net rating
+Fourth-quarter net rating
+Close-game offensive rating
+Close-game defensive rating
+Clutch turnover %
+Clutch shot quality
+Clutch FT%
+Leading-state net rating
+Trailing-state net rating
+Final-two-minute offense
+18. Schedule and fatigue
+Home net rating
+Away net rating
+Back-to-back net rating
+One-day-rest net rating
+Two-plus-day-rest net
+Third-game-in-four-days net
+Travel-distance adjustment
+Altitude adjustment
+Time-zone adjustment
+Days of rest differential
+Player accumulated minutes
+Fatigue-adjusted team rating
+19. Consistency and trends
+Last 5 games net
+Last 10 games net
+Last 20 games net
+Rolling offensive rating
+Rolling defensive rating
+Rolling pace
+Game net-rating variance
+Shot quality trend
+Opponent-adjusted trend
+Turnover variance
+3PT performance vs expected
+Projected regression estimate
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 13
+20. Matchup intelligence
+Offense vs drop
+Offense vs switch
+Offense vs zone
+Offense vs blitz
+Defense vs isolation
+Defense vs PnR
+Defense vs post-up
+Defense vs transition
+Rebound matchup advantage
+Perimeter shot quality edge
+Lineup mismatch advantage
+Opponent-specific net rating forecast
+A5. Connecting the player and team layers
+Player intelligence (universal and specialized) feeds an active-lineup model. That lineup model informs team
+offense, defense, possession mix, shot quality, and matchup outcomes. Team profiles feed back into the expected
+opportunities and efficiency of every participant. Keep the player and team layers on a common, possession-level
+source of truth.
+Recommended tables: games; possessions; play_by_play; players; player_game; team_game; substitutions;
+lineup_stints; shots; rebounds; passes and touches; injuries; rotation_projections; metric_definitions;
+model_features; model_forecasts; forecast_outcomes.
+Available data and access: NBA Stats and its glossary for box-score, advanced, tracking-summary, and shooting
+definitions; play-by-play for possessions, substitutions, and lineup reconstruction; custom or licensed tracking for
+defender assignments, movement, shooting gravity, shot quality and defensive schemes. Historical coverage
+differs by metric and season.
+Principle: record raw data, derived estimates, provider provenance, season coverage, sample sizes and uncertainty.
+Do not infer missing tracking data as if it were directly observed.
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 14
+PART B — PREDICTIVE INTELLIGENCE ENGINE
+The objective is a single probabilistic basketball model in which projected player box scores, team possessions, final
+scores and win probability are generated consistently from the same underlying game events. Rather than
+independently guessing each outcome, predict playing time, opportunities, action types and their results.
+B1. Seven connected predictive layers
+Layer
+Engine
+Core responsibility
+1
+Historical player & team intelligence
+Player skill, role, team efficiency, trends and context
+2
+Availability & minutes
+Participation, starters, rotations, restrictions and bench usage
+3
+Game environment
+Pace, venue, travel, rest and opponent strength
+4
+Usage & opportunities
+Touches, shot attempts, passes, rebounds, shot profile
+5
+Matchup efficiency
+Shot quality, defensive scheme, defender and action outcomes
+6
+Possession-by-possession simulation
+Shots, fouls, turnovers, assists, rebounds, substitutions
+7
+Prediction distributions
+PTS/REB/AST/3PM/STL/BLK/TOV, score, margin and win probability
+B2. Minutes come first
+Project the probability of being active, then a distribution of minutes conditional on participation. Adjust for role,
+recent workload, availability of teammates, coaching rotations, likely game competitiveness, foul risk and
+return-from-injury restrictions. A third model handles minutes lost to foul trouble or events during the game.
+Input group
+Candidate variables
+Role
+Starter status, sixth-man role, position, rotation rank
+Recent workload
+Last 3/5/10 minutes, season minutes, minutes volatility
+Rotation
+Coach patterns, substitution timing, teammate availability
+Health
+Injury report, return to play, minutes restriction
+Fouls
+Foul rate and likely opponent assignment
+Game
+Pace, expected margin, rest, matchup, historical role
+Illustrative minutes output: mean 31.6; central 50% interval 28–35; central 90% interval 22–38. These numbers are synthetic, not
+from any actual player model.
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 15
+B3. Opportunity engine — 24 variables
+Scoring opportunities
+Usage rate
+FGA / 100 possessions
+2PA share
+3PA share
+Free throw rate
+Touches / minute
+Pull-up attempt rate
+Catch-and-shoot rate
+Playmaking opportunities
+Potential assists / 100
+Passes / touch
+Time of possession
+Drives / 100
+Paint touches
+Drive-and-kick frequency
+Pick-and-roll usage
+Teammate shooting conversion expectation
+Rebounding opportunities
+Rebound chances / 100
+Opponent missed shots
+Teammate missed shots
+Rebound chance share
+Contested rebound rate
+Lineup rebound competition
+Shot location mix
+Rebound positioning estimate
+Fundamental relationship: Expected opportunities ≈ on-court possessions × opportunity rate. A player using 29% of
+66 offensive possessions uses ~19.1 possessions; this includes attempts, shooting-foul events and turnovers, and
+does not imply 19 field-goal attempts.
+Usage must redistribute across the active five in each on-court lineup. When an important teammate is missing, do
+not simply add the absent player’s usage rate to one replacement. Estimate role-conditional opportunity
+probabilities across all five players, constrained to sum to 100%.
+B4. Points model — 30 inputs
+Volume and role
+Projected minutes
+On-court possessions
+Usage rate
+FGA / 100
+2PA share
+3PA share
+FTA rate
+Teammate availability
+Rotation role
+Expected shot attempts
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 16
+Shot making and quality
+Rim FG% vs expected
+Midrange FG% vs expected
+Catch-and-shoot 3PT%
+Pull-up 3PT%
+Contested shot accuracy
+Expected shot quality
+Defensive matchup difficulty
+Opponent rim protection
+Opponent perimeter contests
+Shot-making volatility
+Matchup and environment
+Opponent defensive rating
+Likely primary defender
+Help-defense frequency
+Opponent PnR coverage
+Opponent transition defense
+Expected pace
+Expected score margin
+Foul-drawing matchup
+Home/away effects
+Possession distribution
+Scoring identity: E[points] = 2 × E[2PM] + 3 × E[3PM] + E[FTM]. Rather than only predicting points directly, sample
+shot events, zones, make probabilities, foul sequences and free throws with shared lineup and matchup context.
+B5. Rebounds, assists, threes and defensive box-score stats
+Rebounds: Forecast missed-shot opportunities first. Estimate offensive/defensive rebound probabilities and allocate
+credited rebounds to players on court conditional on location, boxouts, conversion skill, competing rebounders and
+position. E[REB] = E[OREB] + E[DREB]. The same rebound must not be awarded twice.
+Rebound inputs: Expected missed shots, rebound chances, shot location, rim distance, positioning, contested
+rebound rate, teammate competition, opposing center, boxouts, lineup, minutes, pace, fouls and conversion
+probability.
+Assists: Model passing opportunity → teammate shot attempt → shot make → official assist credit. Use potential
+assists, passes per touch, drive-and-kick rate, time of possession, PnR usage, teammate shot quality and lineup
+chemistry. Recorded assists must correspond to actual simulated made field goals.
+Three-pointers: Predict 3PA volume separately from make probability. Inputs include minutes, 3PA share, shot
+profile, catch-and-shoot versus pull-up mix, defender proximity, shot quality, primary creator availability and
+expected defensive coverage. A basic conditional model is 3PM | 3PA = n ~ Binomial(n,p); a higher-fidelity model
+allows varying shot difficulty and correlated outcomes.
+Stat
+Core predictive drivers
+Steals
+Defensive possessions, deflections, opponent ball security, matchups, minutes
+Blocks
+Opponent rim attempts, contest opportunities, block conversion, assignments
+Turnovers
+Touches, on-ball role, pressure, passing risk, traps
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 17
+Stat
+Core predictive drivers
+Personal fouls
+Assignment, opponent foul drawing, minutes, defensive responsibility
+Free throws
+Drives, paint attacks, shooting foul odds, opponent foul rate
+Zero-inflated or overdispersed count models may be useful for sparse events, but possession-level simulation can
+produce more coherent joint outcomes.
+B6. Team winner and final-score engine
+Combine (i) opponent-adjusted long-run team strength, (ii) current active lineup and expected rotation strength,
+and (iii) game-specific matchup and environment. Model fitted contributions rather than hard-coding manual
+weights. As a conceptual example only, one could begin with a 35%/45%/20% blend and then learn the actual
+optimal structure on historical data.
+Category
+Inputs
+Strength
+Adjusted offensive rating, adjusted defensive rating, net rating, schedule
+Personnel
+Projected active players, minutes, lineup impact, replacement quality
+Pace
+Possessions per 48, offensive action duration, rest
+Shooting
+Rim access, shot quality, three-point attempt quality
+Turnovers
+Offensive turnover risk vs defense forced-turnover ability
+Rebounds
+Offensive rebounding vs opponent defensive rebounding
+Free throws
+Foul-drawing vs opponent foul propensity
+Matchups
+Switch/drop/zone coverage, transition, isolation, PnR
+Environment
+Home court, travel, fatigue, back-to-back games
+Simplified expected score: Expected points = expected possessions × expected points per possession. Example:
+100 possessions × 1.18 = 118 for Team A; 100 × 1.12 = 112 for Team B, a six-point expected margin. These are
+synthetic values and omit the full distribution of pace, efficiency, game state and late-game behavior.
+B7. Possession-by-possession simulation
+1. Determine five on-court players, game clock, score, team fouls and rotation state.
+2. Select action type (transition, pick-and-roll, isolation, post-up, spot-up, handoff).
+3. Assign participating ball handler, passer, shooter, screener and defenders.
+4. Resolve shot attempt, turnover, block, shooting foul or other event.
+5. Resolve makes/misses, free throws, live/dead balls and rebound outcomes.
+6. Update team score, possession, player box scores, fatigue, fouls and substitutions.
+7. Continue until regulation concludes; simulate overtime when required.
+All outputs must reconcile: points credited to shooters sum to the team score (accounting for all scoring rules);
+assists attach to eligible made field goals; rebound counts arise from missed-shot opportunities; possession totals,
+minutes, on-court status, and team results remain consistent.
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 18
+B8. Monte Carlo outputs
+Run many independent game simulations conditional on estimated player, team, lineup and environmental
+distributions. Compute the share each team wins, expected score, median margin, total, and percentile intervals.
+For each player, collect PTS, REB, AST, 3PM, STL, BLK, TOV, FGA, FTA and minutes across all simulations.
+Estimated win probability = games won by Team A / total simulations. Estimated chance player i scores at least 30
+= number of simulations with PTS_i ≥ 30 / total simulations. The sample size reduces Monte Carlo noise; it does not
+repair a misspecified simulation.
+Demo output
+Fictional example
+Game
+Team A 118 – Team B 112
+Win chance
+Team A 64%, Team B 36%
+Player points
+Mean 27.4; median 27; illustrative middle-80% 19–36
+Rebounds
+Mean 6.8; median 7; illustrative middle-80% 3–11
+Assists
+Mean 8.1; median 8; illustrative middle-80% 4–13
+Made threes
+Mean 3.2; median 3; illustrative middle-80% 1–6
+All numbers in this table are explicitly fictional dashboard demonstrations, not forecasts derived from simulations.
+B9. Scenario, matchup and archetype intelligence
+Model separate active, restricted and inactive outcomes for questionable players, and combine the conditional
+predictions using scenario probabilities. A single injury can change the entire team’s minutes, shot volume, assist
+conversion, spacing, rebounding, and chance of winning.
+Offensive skill
+Defensive opposition feature
+Pull-up threes
+Drop coverage and screen navigation
+Rim finishing
+Rim protection and deterrence
+Isolation scoring
+Individual isolation containment
+Post-ups
+Post defense and double-team tendencies
+Drive-and-kick
+Help-defense and closeout frequency
+Offensive rebounding
+Boxouts and defensive rebounding
+Pick-and-roll passing
+Blitz, hedge, switch and drop
+Transition finishing
+Transition organization
+Catch-and-shoot
+Closeout quality and shot suppression
+Estimate player roles continuously (e.g., primary creator, secondary handler, movement shooter, defensive
+stopper, stretch big, rim protector). Use archetype mixtures rather than rigid position labels to model tactical fit.
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 19
+Five-man lineups need their own offensive/defensive ratings, spacing, ball movement, role fit, rim protection and
+rebounding profiles. Shrink small-sample lineup performance toward priors constructed from component players
+and comparable lineup types.
+B10. Statistical training architecture
+Submodel
+Starter methodology
+Primary target
+Availability
+Calibrated classifier
+Probability player is active
+Minutes
+Hierarchical distributional regression
+Minutes and uncertainty
+Rotation
+State-based substitution model
+Lineup changes
+Pace
+Regression + possession clock process
+Possessions
+Usage
+Multinomial conditional model
+Who finishes a play
+Offensive action
+Multiclass model
+PnR, isolation, transition, etc.
+Shot zone
+Multinomial / boosted trees
+Attempt location
+Shot make
+Logistic + player effects
+Make probability
+Assists
+Event-linked passing model
+Assist assignment
+Rebounds
+Conditional allocation
+Rebound owner
+Fouls / turnovers
+Event hazard models
+Possession disruption
+Game outcome
+Monte Carlo + calibration
+Scores and win probability
+Use regularization and hierarchical Bayesian shrinkage to limit noise from small samples. Conceptually, a skill
+probability can blend recent evidence with a prior: p_hat = [n/(n+k)] p_recent + [k/(n+k)] p_prior, where k is tuned
+to historical data.
+B11. Evaluation and monitoring
+Forecast
+Primary metrics
+Other validation
+Game winner
+Log loss, Brier score
+Calibration and reliability plots
+Final score / margin
+MAE, RMSE
+Prediction interval coverage
+Game total
+MAE, distribution score
+Tail calibration
+Points
+MAE, CRPS
+Quantile coverage
+Rebounds / assists
+MAE, count likelihood
+Distribution fit
+Three-pointers
+Count likelihood
+3PM threshold calibration
+Minutes
+MAE, quantile loss
+Role and injury splits
+Combined box scores
+Multivariate validation
+Joint correlation structure
+
+NBA QUANT | PLAYER + TEAM INTELLIGENCE & PREDICTION ENGINE
+Page 20
+Perform walk-forward testing: train on historical information, predict later games using only data known before
+tipoff, freeze predictions, compare to outcomes, advance the window, and retrain on a predefined schedule.
+Evaluate rookies, starters, reserves, injury-affected games, back-to-backs, high-usage players and rare events
+separately.
+After each game, decompose forecast error into minutes, usage, attempt volume, shot quality, shooting variance,
+assist conversion, rebound opportunities, possessions, and team scoring. Do not interpret one hot shooting night as
+proof of a broken model. Audit both discrimination and calibration, and monitor model drift.
+B12. Build sequence
+Phase 1 — Historical data foundation: Reconstruct possessions, games, substitutions, lineups, shots and source
+provenance.
+Phase 2 — Player forecasting: Train active status, minutes, FGA/3PA/FTA, assist and rebound opportunity models.
+Phase 3 — Team forecasting: Build opponent-adjusted strength, pace, score and win-probability baselines.
+Phase 4 — Unified simulation: Connect possession events and player box scores with team results.
+Phase 5 — Advanced tracking features: Add shot quality, spatial gravity, coverage, assignments and lineup
+interactions.
+Phase 6 — Validation and production: Freeze predictions; evaluate out of sample; publish calibrated distributions
+and audit logs.
+B13. Finished prediction report
+Ten panels to expose in the terminal
+Game outcome: win probability, score, margin and total
+Player box scores: PTS/REB/AST/3PM/STL/BLK/TOV/minutes
+Probability distributions and threshold chances
+Player-versus-defender matchup intelligence
+Rotation and expected five-man lineups
+Availability and minutes-restriction scenarios
+Cross-stat correlations and covariance
+Simulation explanation and major outcome drivers
+Live in-game updates to state and win probability
+Frozen prior predictions, actual outcomes and model audit
+Core operating rule: project who plays, how long they play, the opportunities they receive, the types of possession
+events that occur, and the results of those events. The game winner and every player’s box score should emerge
+from the same coherent event history.
+References / implementation links
+NBA Stats: https://www.nba.com/stats/
+NBA Stats glossary: https://www.nba.com/stats/help/glossary
+This document consolidates the two preceding NBA framework responses into a single structured reference. Interactive chat mockups
+have been converted to printable tables and written explanations.

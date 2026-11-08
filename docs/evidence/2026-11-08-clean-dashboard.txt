@@ -1,0 +1,2 @@
+Dashboard checks passed: existing forecast/provenance/SGP checks; available-first metrics; tonight cards; actual construction-module 3/5/8-leg drafts; builder and bulk jobs; FanDuel source labels; Polymarket read-only refresh, signed indicative odds, unavailable order-book state, HTML escaping, filters and empty coverage; standard/aggressive query wiring.
+Temporary API fixture and SQLite database cleaned up. No browser visual check performed.

@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-08",
+  "repository": "tcase0618/Codex-NBA-SGP",
+  "visibility": "private",
+  "validation_environment": "Fresh temporary source export and isolated Python3.11 environment; no original runtime database or ML environment",
+  "tests": {
+    "passed": 594,
+    "warnings": 1,
+    "seconds": 46.72
+  },
+  "dashboard_harness": "PASS",
+  "javascript_syntax": "PASS",
+  "browser_visual_qa": "UNVERIFIED",
+  "fresh_install_fixes": [
+    "Explicit Windows tzdata dependency",
+    "SciPy declared for tests and historical report tools"
+  ],
+  "excluded_runtime": [
+    "SQLite databases",
+    "provider response archives",
+    "trained artifacts",
+    "generated outputs",
+    "environments",
+    "secrets",
+    "temporary files"
+  ],
+  "execution": "NONE",
+  "production_predictive_approval": "NOT_ESTABLISHED",
+  "github_ci": "Pending first remote run"
+}

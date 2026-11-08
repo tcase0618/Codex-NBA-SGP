@@ -1,0 +1,36 @@
+{
+  "cohort": "SYNTHETIC_SOFTWARE_ONLY",
+  "nba_accuracy": "NOT MEASURABLE",
+  "runs": [
+    {
+      "target": "pts",
+      "id": "20261106T214708-ad7c7a932447",
+      "backends_fit": [
+        "autogluon",
+        "xgboost"
+      ],
+      "restored_in_new_process": [
+        "champion",
+        "autogluon",
+        "xgboost"
+      ],
+      "synthetic_promotion_blocked": true,
+      "seconds": 16.905999999959022
+    },
+    {
+      "target": "win",
+      "id": "20261106T214725-243df34fa16b",
+      "backends_fit": [
+        "autogluon",
+        "xgboost"
+      ],
+      "restored_in_new_process": [
+        "champion",
+        "autogluon",
+        "xgboost"
+      ],
+      "synthetic_promotion_blocked": true,
+      "seconds": 15.687000000150874
+    }
+  ]
+}

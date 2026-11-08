@@ -129,11 +129,58 @@ Archetypes are multi-label (14 roles) and assigned by documented thresholds on d
 python -m nba_quant.intel backtest 2025-11-17T12:00Z 2026-06-25T00:00Z --sims 2000 --workers 3
 ```
 
-See [Results](#8-results) for measured numbers.
+Measured numbers are in section 8.
 
 ## 8. Results
 
-RESULTS_PLACEHOLDER
+Measured on 2026-11-08 with `possession-sim-1.0`, 2,000 simulations per game and weekly refits. Every number below is walk-forward on archived data, not a live prospective record. No historical injury reports were used.
+
+### Games: 2025-26 (Nov 17 → Finals, 1,113 games, 0 forecast failures)
+
+| Win probability | Log loss | Brier | Accuracy |
+|---|---|---|---|
+| Coin flip | 0.6931 | 0.2500 | — |
+| Simulation (raw) | 0.6125 | 0.2117 | 66.4% |
+| Team ridge ratings only | 0.6085 | 0.2097 | 68.8% |
+| Simulation + walk-forward Platt (958 games) | **0.6041** (raw 0.6117 on the same games) | 0.2086 | — |
+| DraftKings moneyline, de-vigged (1,055 games, benchmark) | **0.5764** | — | — |
+
+| Scores | Model | Market (1,060 games) |
+|---|---|---|
+| Margin MAE | 11.84 | 11.19 |
+| Total MAE | 15.20 | 14.58 |
+| 80% interval coverage, margin / total | 86.7% / 81.6% | — |
+| Bias, margin / total | +0.08 / +0.80 | — |
+
+**Calibration finding.** The raw simulator is under-confident. Forecasts in the 0.6–0.7 bin won 71.6% (predicted 64.6%); the 0.7–0.8 bin won 84.5% (predicted 74.2%); the 0.3–0.4 bin won 22.1% (predicted 35.8%). The Platt fit on all 2025-26 forecasts has slope 1.57.
+
+**Out-of-sample check.** Applied unchanged to the 2026-27 run (96 games, Oct 27 – Nov 7), it lowered log loss from 0.6279 to 0.6144. Live projections now report this calibrated probability next to the raw simulated share.
+
+### Games: 2026-27 to date (96 games)
+
+Raw log loss 0.6279 (ratings-only 0.6288), Brier 0.2186, margin MAE 11.89 (market 10.70), total MAE 15.06 (market 14.51).
+
+### Players: 2025-26 (23,688 player-games that were played; MAE conditional on playing)
+
+| Stat | Model MAE | Last-10 average MAE | 80% interval coverage (all rostered, DNP = 0) |
+|---|---|---|---|
+| Points | 4.68 | 4.65 | 88.1% |
+| Rebounds | 2.00 | 1.93 | 89.6% |
+| Assists | 1.43 | 1.37 | 91.7% |
+| 3PM | 0.92 | 0.90 | 93.6% |
+| Steals | 0.74 | 0.74 | 94.7% |
+| Blocks | 0.54 | 0.51 | 95.4% |
+| Turnovers | 0.91 | 0.91 | 94.2% |
+| Minutes | 5.13 | 5.12 | 89.8% |
+
+Availability (played vs not, 34% DNP base rate among rostered players): Brier 0.144, log loss 0.453.
+
+### What this means, plainly
+
+- **Game-level skill is real.** Log loss is well below a coin flip and stays that way out of sample.
+- **The model does not beat the closing-quality market.** Both margin MAE and moneyline log loss trail the DraftKings line. Treat the model as a research and scenario tool, not an edge.
+- **Player means are no better than a last-10-games average**, and the intervals are too wide (they cover 88–95% instead of 80%). The next work items are reducing simulator dispersion (per-player shooting noise and minutes SD) and adding real availability data.
+- **No model was auto-promoted.** The calibrated win probability is the only post-hoc change, and it was validated out of sample before it was enabled.
 
 ## 9. Terminal workspaces
 

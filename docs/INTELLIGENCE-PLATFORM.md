@@ -41,7 +41,7 @@ Each layer feeds the next: player profiles feed the lineup models; lineup stints
 | Item | Value (verified 2026-11-08) |
 |---|---|
 | Provider | ESPN public site API (secondary statistics provider, not the official NBA feed) |
-| Games | 1,451 (2025-26 regular season 1,231 incl. Cup final; 2025-26 playoffs 81; 2026-27 through Nov 7: 139) |
+| Games | 1,458 (2025-26 regular season 1,231 incl. Cup final; 2025-26 playoffs 81; 2026-27 through Nov 8: 146) |
 | Play-by-play validated | 1,244 games pass every reconstruction check |
 | Rows | 708k play events · 259k shots · 292k possessions · 50.5k lineup stints · 38k player games |
 | Rejected | 4 provider 404s at acquisition; All-Star exhibitions excluded (franchise IDs 1–30 only) |
@@ -65,12 +65,21 @@ Runtime data lives under `output/` (gitignored) and is rebuilt from the cache. A
 - **NBA 2024-25 heave rule.** A missed shot from 36 ft or more in the final 3 seconds of quarters 1–3 is a team attempt, not a player FGA. This reconciled 222 → 48 FGA mismatches; the remainder are provider attribution errors.
 - **Checks stored per game:** possession points + technical points = final score; stint points = final score; lineups always five; stint seconds = game length; shot count vs box FGA; player-minutes MAE.
 
+### Official injury reports
+
+`python -m nba_quant.intel injuries` fetches the official NBA injury report PDFs from `ak-static.cms.nba.com`:
+- Files are hourly (`_06PM`) before 2025-12-22 and every 15 minutes (`_06_00PM`) after.
+- Each game uses the latest report at or before its forecast cutoff (tipoff − 1 hour).
+- Listings are stored with the report's publication time as `known_at`. Teams marked "NOT YET SUBMITTED" carry no information.
+- Coverage: 901 reports, 106k listings, every warehouse game. Unmatched names are players with no box-score appearance (season-long injuries, unused two-ways).
+
+Observed P(played) by listed status: Out 0.04%, Doubtful 0%, Questionable 58% (starters 71%, bench 39%), Probable 93%, not listed 75%. Not listed is 99% for starters with no missed-game streak and about 10% after a 10+ game absence. The availability model is fitted from these rows strictly before each cutoff. Teams without a submitted report fall back to the participation-streak model.
+
 ### Unavailable sources (registered, never synthesized)
 
 - Optical tracking: speed, distance, touches, defender distance, deflections, boxouts, matchups.
 - Synergy play types: PnR, isolation, spot-up, post-up and similar PPP.
 - Defensive coverage tagging: drop, switch, hedge, blitz, zone.
-- Historical injury reports.
 
 The `tracking_events` and `player_matchups` tables exist but are empty.
 
@@ -133,6 +142,35 @@ python -m nba_quant.intel backtest 2025-11-17T12:00Z 2026-06-25T00:00Z --sims 20
 Measured numbers, including the v1.0 → v1.1 comparison, are in section 8.
 
 ## 8. Results
+
+### v1.2: official injury reports + tuned player layer (validation games only)
+
+Measured 2026-11-09. v1.2 adds pregame NBA injury reports (section 3) and the player-layer settings below. All v1.2 settings were chosen on Dec 2025–Feb 2026 games. Comparisons use the same games for every version.
+
+| Window | Games | v1.0 | v1.1 | **v1.2** | Market / baseline |
+|---|---|---|---|---|---|
+| Mar–Jun 2026 win log loss | 405 | 0.5700 | 0.5565 | **0.5458** | market 0.5029 |
+| Mar–Jun margin MAE | 405 | 11.98 | 11.94 | **11.83** | market 11.06 |
+| Mar–Jun player points MAE (when playing) | — | 4.75 | 4.76 | **4.61** | last-10 average 4.76 |
+| 2026-27 win log loss | 96 | 0.6279 | **0.5838** | 0.5859 | market 0.5486 |
+| 2026-27 player points MAE | — | 4.78 | 4.79 | **4.65** | last-10 average 4.72 |
+| Availability Brier (played vs not) | — | 0.144 | — | **0.092** | |
+
+**The player-range "over-coverage" was a measurement artifact.** v1.0 reported 88–95% coverage for 80% intervals using an inclusive p10 ≤ y ≤ p90 check. On integer counts that check over-reports even for a perfect forecast (shown in `test_randomized_pit_is_exact_for_a_correct_discrete_forecast`). With a randomized PIT, v1.2 central-80% coverage on Mar–Jun is 76% (pts), 77% (reb, ast), 79% (3PM) and 80% (stl, blk, tov), slightly under rather than over.
+
+**Distributions beat the simple baseline on every stat.** Ranked probability score vs a Poisson distribution centred on the player's last-10 average (Mar–Jun): pts 3.20 vs 3.62, reb 1.31 vs 1.37, ast 0.94 vs 0.96, 3PM 0.58 vs 0.61, stl 0.45 vs 0.47, blk 0.30 vs 0.31, tov 0.58 vs 0.61. Point MAE is better for points, turnovers and minutes; tied for rebounds, 3PM and steals; slightly worse for assists and blocks.
+
+**Player-layer tuning** (coordinate search on every 3rd Dec–Feb game; objective = summed RPS; baseline 7.425):
+
+| Setting | RPS | Note |
+|---|---|---|
+| minutes SD ×0.7 / ×1.3 | 7.404 / 7.478 | narrower is better |
+| recency weight 1.0 / 2.0 (last 30 days) | 7.397 / 7.392 | 1.0 also improved game log loss |
+| shrinkage ×0.5 / ×2.0 | 7.384 / 7.513 | lighter is better |
+| previous-season weight | — | untestable: no prior season in the 2025-26 window |
+| **recency 1.0 + minutes ×0.7 + shrinkage ×0.5 (chosen)** | **7.351** | Poisson last-10 baseline 7.753 |
+
+**Still true.** The model trails the market on both validation windows. The 2026-27 game log loss difference between v1.1 and v1.2 (96 games) is within noise.
 
 ### v1.1 vs v1.0 on validation games only
 
@@ -203,7 +241,21 @@ Availability (played vs not, 34% DNP base rate among rostered players): Brier 0.
 - **Player means are no better than a last-10-games average.** That is the weakest component. Its interval over-coverage (88–95%) is partly real overdispersion and partly the inclusive quantile check on integer counts. A randomized-PIT evaluation is the next fix to the measurement itself.
 - **Nothing ships on training fit.** Every v1.1 setting was tuned on Dec–Feb and judged on later games, and the calibration layer is gated on walk-forward evidence.
 
-## 9. Terminal workspaces
+## 9. Parlays
+
+`python -m nba_quant.intel parlays [YYYY-MM-DD]` builds tickets for a day's unplayed games:
+- It first fetches the newest injury report, then simulates each game 20,000 times at the current cutoff.
+- **Legs** are indicators over the simulated games: player milestones (pts / reb / ast / 3PM / PRA "X+", for players with ≥90% play probability and 20+ projected minutes) plus moneyline, spread and total at the posted line.
+- **Ticket probability** is the share of simulated games in which every leg hits, so correlation is priced from shared events, not by multiplying marginals.
+
+Three ticket types per slate:
+- **Core:** highest joint probability.
+- **Correlated:** largest correlation lift within a +120 to +300 band.
+- **Cross-game:** 3, 5 and 8 legs, multiplying independent games.
+
+Each ticket reports its fair American odds (the break-even price). Sportsbook player-prop prices are not available here, so value is not certified. Play only where the payout beats fair odds, and remember the walk-forward record above. Output goes to `output/parlays/`.
+
+## 10. Terminal workspaces
 
 | Workspace | Content |
 |---|---|
@@ -214,9 +266,9 @@ Availability (played vs not, 34% DNP base rate among rostered players): Brier 0.
 | E Prediction | ESPN schedule picker; 1k/10k/50k sims; seed; cutoff; per-player availability and minutes-cap scenarios; score/win/margin/total, histograms, quarter table, team box, provenance and identity checks, player distributions, threshold explorer, correlations, drivers |
 | F Audit | Walk-forward scores, calibration plots (raw and walk-forward Platt), market benchmark, segments, player MAE vs last-10 baseline, availability scoring, model registry, xFG reliability and coefficients |
 
-## 10. Limitations and next priorities
+## 11. Limitations and next priorities
 
-1. **Historical injury reports.** Availability is modeled from participation only. Ingesting time-stamped official reports is the largest expected gain for player forecasts.
+1. **Injury reports: done in v1.2.** Remaining gap: minutes conditional on Questionable/Probable status (restrictions) are not modeled separately.
 2. **Tracking and play-type data** require a license. 53 team, 33 universal and 62 positional slots stay `UNAVAILABLE` until then.
 3. **Tuning.** Done for the game layer in v1.1 (ratings half-life, spread stretch, score effect). The player layer is next: shrinkage constants, minutes SD, per-player shooting noise, and RAPM λ, tuned the same way on a held-out window.
 4. **AutoGluon/XGBoost.** These remain in the existing shadow framework (`ml_*`) and are not wired into the intelligence stack. Any promotion must beat the walk-forward numbers above on the same games.

@@ -39,12 +39,12 @@ def week_cutoffs(start, end):
 
 
 def _run_week(args):
-    db_path, model_cutoff, games, sims, seed = args
+    db_path, model_cutoff, games, sims, seed, config = args
     from .engine import Engine
     from .projection import Projector
     from .warehouse import Warehouse
     wh = Warehouse(db_path)
-    pj = Projector(Engine(wh))
+    pj = Projector(Engine(wh), **(config or {}))
     out = []
     for g in games:
         tip = datetime.fromisoformat(g["tipoff"].replace("Z", "+00:00"))
@@ -76,7 +76,7 @@ def _run_week(args):
     return out
 
 
-def run(wh, start, end, sims=2000, seed=11, workers=4, progress=print, max_games=None):
+def run(wh, start, end, sims=2000, seed=11, workers=4, progress=print, max_games=None, config=None, stride=1):
     """Produce frozen walk-forward forecasts for completed games in [start, end)."""
     start, end = M.iso(start), M.iso(end)
     weeks = week_cutoffs(start, end)
@@ -87,11 +87,13 @@ def run(wh, start, end, sims=2000, seed=11, workers=4, progress=print, max_games
         hi = M.iso(wk + timedelta(days=7))
         games = wh.query("SELECT * FROM games WHERE tipoff >= ? AND tipoff < ? AND tipoff >= ? AND tipoff < ? ORDER BY tipoff",
                          (lo, hi, start, end))
+        if stride > 1:
+            games = games[::stride]
         if max_games:
             games = games[:max(0, max_games - total)]
         total += len(games)
         if games:
-            tasks.append((wh.path, lo, games, sims, seed))
+            tasks.append((wh.path, lo, games, sims, seed, config))
     progress(f"{len(tasks)} weekly refits, {total} games")
     forecasts = []
     t0 = time.time()
@@ -106,7 +108,8 @@ def run(wh, start, end, sims=2000, seed=11, workers=4, progress=print, max_games
             if "error" not in f:
                 db.execute("INSERT OR REPLACE INTO model_predictions VALUES(?,?,?,?,?,?)", (
                     f"{run_id}:{f['game_id']}", "possession-sim-1.1", f["game_id"], created, f["cutoff"], json.dumps(f)))
-    return {"run_id": run_id, "created_at": created, "forecasts": forecasts, "start": start, "end": end, "sims": sims}
+    return {"run_id": run_id, "created_at": created, "forecasts": forecasts, "start": start, "end": end, "sims": sims,
+            "config": config or {}}
 
 
 # ----------------------------------------------------------------- scoring

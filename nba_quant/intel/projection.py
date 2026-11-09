@@ -28,6 +28,8 @@ SIM_VERSION = "possession-sim-1.1"
 # logit change per 10-point lead that brings simulated margin spread down to
 # observed forecast residuals. Both were set on Dec 2025-Feb 2026 games only.
 STRENGTH_STRETCH = 1.17
+# Player-layer knobs (walk-forward tuned; see docs section 8).
+PLAYER_DEFAULTS = {"min_sd_scale": 1.0, "prev_weight": 0.5, "recent_weight": 0.0, "recent_days": 30, "shrink_scale": 1.0}
 SCORE_EFFECT = 0.035
 COMBOS = {"pra": ("pts", "reb", "ast"), "pr": ("pts", "reb"), "pa": ("pts", "ast"), "ra": ("reb", "ast"),
           "stocks": ("stl", "blk"), "fg3m_pts": ("pts",)}
@@ -42,8 +44,12 @@ def _shrink(n, d, prior, k):
 
 
 class Projector:
-    def __init__(self, engine, strength_stretch=None, score_effect=None):
+    def __init__(self, engine, strength_stretch=None, score_effect=None, **player):
         self.engine = engine
+        unknown = set(player) - set(PLAYER_DEFAULTS)
+        if unknown:
+            raise ValueError(f"Unknown player-layer settings: {sorted(unknown)}")
+        self.player = {**PLAYER_DEFAULTS, **player}
         self.strength_stretch = STRENGTH_STRETCH if strength_stretch is None else strength_stretch
         self.score_effect = SCORE_EFFECT if score_effect is None else score_effect
         self.wh = engine.wh
@@ -248,6 +254,11 @@ class Projector:
         prev = self.wh.scalar("SELECT MAX(season) FROM games WHERE season < ?", (season,))
         cur = eng.player_aggs(mc, season) if eng.season_for(mc) == season else {}
         old = eng.player_aggs(mc, prev) if prev else {}
+        recent = {}
+        if self.player["recent_weight"] > 0 and cur:
+            lo = M.iso(datetime.fromisoformat(mc.replace("Z", "+00:00")) - timedelta(days=self.player["recent_days"]))
+            ids = [g["id"] for g in self.wh.query("SELECT id FROM games WHERE tipoff >= ? AND tipoff < ? AND season = ?", (lo, mc, season))]
+            recent = eng.player_aggs(mc, season, game_ids=ids) if ids else {}
         zone_def = self.zone_defense(mc, season, prev)
         ff = self.four_factors(mc, season, prev)
         info = {p["id"]: p for p in self.wh.query("SELECT * FROM players")}
@@ -288,11 +299,11 @@ class Projector:
                     WHERE player_id=? AND tipoff < ? AND minutes > 0 ORDER BY tipoff DESC LIMIT 10""", (pid, cutoff))
                 baseline = {k: round(float(np.mean([r[k] for r in recent_rows])), 3) for k in
                             ("pts", "reb", "ast", "fg3m", "stl", "blk", "tov", "minutes")} if recent_rows else None
-                a = _combine(cur.get(pid), old.get(pid))
+                a = _combine(cur.get(pid), old.get(pid), self.player["prev_weight"], recent.get(pid), self.player["recent_weight"])
                 pos = (info.get(pid) or {}).get("position", "F")
-                rates = player_rates(a, lg)
+                rates = player_rates(a, lg, self.player["shrink_scale"])
                 min_mean = project_minutes(mins[-20:]) if mins else 10.0
-                min_sd = max(3.0, float(np.std(mins[-15:])) if len(mins) > 2 else 6.0)
+                min_sd = max(3.0, float(np.std(mins[-15:])) if len(mins) > 2 else 6.0) * self.player["min_sd_scale"]
                 s = scen.get(pid, {})
                 if s.get("active_probability") is not None:
                     p_active, availability_source = float(s["active_probability"]), "scenario"
@@ -405,11 +416,12 @@ def _role(mins):
     return "starter" if m >= 28 else "rotation" if m >= 16 else "bench" if m >= 6 else "deep"
 
 
-def _combine(cur, old, old_weight=0.5):
-    """Count-weighted blend: current season + down-weighted previous season."""
+def _combine(cur, old, old_weight=0.5, recent=None, recent_weight=0.0):
+    """Count-weighted blend: current season + down-weighted previous season +
+    optional extra weight on a recent window (recency emphasis)."""
     from .catalog import Agg
     out = Agg()
-    for src, w in ((cur, 1.0), (old, old_weight)):
+    for src, w in ((cur, 1.0), (old, old_weight), (recent, recent_weight)):
         if not src:
             continue
         for k, v in src.items():
@@ -420,30 +432,33 @@ def _combine(cur, old, old_weight=0.5):
     return out
 
 
-def player_rates(a, lg):
+def player_rates(a, lg, shrink_scale=1.0):
     """Shrunk per-player event rates used by the simulator (MODELED inputs).
 
     Shooting-foul trips exclude and-one free throws, which the simulator adds
     separately after made field goals: trips = FTA * (1 - and1 share) / 2.05."""
+    def _s(n, d, prior, k):
+        return _shrink(n, d, prior, k * shrink_scale)
+
     used = a["fga"] + .44 * a["fta"] + a["tov"]
     trips = a["fta"] * (1 - lg.get("and1_fta_share", 0.1)) / 2.05
     team_used = a["on_tm_fga"] + .44 * a["on_tm_fta"] + a["on_tm_tov"]
-    usage = _shrink(used, team_used, 0.19, 150)
-    tov = _shrink(a["tov"], used, 0.125, 120)
-    foul = _shrink(trips, used, 0.085, 120)
+    usage = _s(used, team_used, 0.19, 150)
+    tov = _s(a["tov"], used, 0.125, 120)
+    foul = _s(trips, used, 0.085, 120)
     shots = sum(a[f"z_{z}_a"] for z in ZONE_KEYS)
-    mix = [_shrink(a[f"z_{z}_a"], shots, lg["zone_share"][z], 40) for z in ZONE_KEYS]
-    fg = [_shrink(a[f"z_{z}_m"], a[f"z_{z}_a"], lg["zone_fg"][z], ZONE_PRIOR_K[z]) for z in ZONE_KEYS]
+    mix = [_s(a[f"z_{z}_a"], shots, lg["zone_share"][z], 40) for z in ZONE_KEYS]
+    fg = [_s(a[f"z_{z}_m"], a[f"z_{z}_a"], lg["zone_fg"][z], ZONE_PRIOR_K[z]) for z in ZONE_KEYS]
     poss_played = (a["on_po"] + a["on_pd"]) / 2
     return {"usage": round(usage, 4), "tov": round(tov, 4), "foul_draw": round(foul, 4),
-            "ft_pct": round(_shrink(a["ftm"], a["fta"], .78, 40), 4),
-            "three_ft": round(min(.2, .08 * _shrink(a["fg3a"], a["fga"], .4, 50)), 4),
-            "ast_w": round(_shrink(a["ast"], a["on_po"], .055, 300), 5),
-            "oreb_w": round(_shrink(a["oreb"], a["on_oreb"] + a["on_opp_dreb"], .052, 300), 5),
-            "dreb_w": round(_shrink(a["dreb"], a["on_dreb"] + a["on_opp_oreb"], .148, 300), 5),
-            "stl_w": round(_shrink(a["stl"], a["on_pd"], .016, 300), 5),
-            "blk_w": round(_shrink(a["blk"], a["on_pd"], .01, 300), 5),
-            "pf_w": round(_shrink(a["pf"], poss_played, .038, 300), 5),
+            "ft_pct": round(_s(a["ftm"], a["fta"], .78, 40), 4),
+            "three_ft": round(min(.2, .08 * _s(a["fg3a"], a["fga"], .4, 50)), 4),
+            "ast_w": round(_s(a["ast"], a["on_po"], .055, 300), 5),
+            "oreb_w": round(_s(a["oreb"], a["on_oreb"] + a["on_opp_dreb"], .052, 300), 5),
+            "dreb_w": round(_s(a["dreb"], a["on_dreb"] + a["on_opp_oreb"], .148, 300), 5),
+            "stl_w": round(_s(a["stl"], a["on_pd"], .016, 300), 5),
+            "blk_w": round(_s(a["blk"], a["on_pd"], .01, 300), 5),
+            "pf_w": round(_s(a["pf"], poss_played, .038, 300), 5),
             "zone_mix": [round(x / sum(mix), 4) for x in mix], "zone_fg": [round(x, 4) for x in fg]}
 
 

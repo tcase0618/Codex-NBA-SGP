@@ -70,6 +70,7 @@ def _run_week(args):
                                "p10": {k: p["stats"][k]["p10"] for k in PLAYER_STATS},
                                "p90": {k: p["stats"][k]["p90"] for k in PLAYER_STATS},
                                "cond_mean": {k: v["mean"] for k, v in p["conditional_on_playing"].items()},
+                               "cdf": p.get("cdf_conditional"),
                                "baseline": p["baseline_last10"]} for p in r["players"]]}
         out.append(frozen)
     return out
@@ -250,6 +251,7 @@ def score(wh, forecasts):
                     "unconditional_mae_all_rostered": _mean([abs(x["pl"]["mean"][k] - ((x["act"] or {}).get(k) or 0 if x["played"] else 0)) for x in prow]),
                     "interval_80_coverage_all_rostered": _mean([x["pl"]["p10"][k] <= (((x["act"] or {}).get(k) or 0) if x["played"] else 0) <= x["pl"]["p90"][k] for x in prow])}
     pm["stats"] = stats
+    pm["distribution"] = distribution_scores(played)
     # Segments for points (conditional MAE).
     seg = defaultdict(list)
     for x in played:
@@ -273,6 +275,55 @@ def score(wh, forecasts):
             "notes": ["Retrospective walk-forward on archived ESPN data: features use only games before each cutoff, but this is not a live prospective test.",
                       "No historical injury reports: availability uses only prior-game participation.",
                       "Player MAE is conditional on the player actually playing (prop-style); unconditional MAE includes DNP zeros."]}
+
+
+def _F(cdf, k):
+    if k < 0:
+        return 0.0
+    return cdf[k] if k < len(cdf) else 1.0
+
+
+def _poisson_cdf(lam, kmax):
+    out, term, acc = [], math.exp(-lam), 0.0
+    for k in range(kmax + 1):
+        acc += term
+        out.append(min(1.0, acc))
+        term *= lam / (k + 1)
+    return out
+
+
+def distribution_scores(played, seed=7):
+    """Randomized PIT calibration and ranked probability score for integer stats,
+    conditional on playing, vs a Poisson(last-10 mean) baseline on the same rows.
+
+    PIT: u = F(y-1) + V * (F(y) - F(y-1)), V ~ U(0,1); calibrated forecasts give
+    u ~ Uniform(0,1), so the central 80% interval should hold 80% of outcomes.
+    The inclusive check p10 <= y <= p90 overstates coverage for integer counts."""
+    rng = np.random.default_rng(seed)
+    out = {}
+    from .projection import CDF_STATS
+    for k in CDF_STATS:
+        rows = [x for x in played if x["pl"].get("cdf") and x["pl"]["cdf"].get(k) and x["pl"]["baseline"]]
+        if not rows:
+            continue
+        u, rps_m, rps_b, ub = [], [], [], []
+        for x in rows:
+            cdf, y = x["pl"]["cdf"][k], int(x["act"][k])
+            v = rng.random()
+            u.append(_F(cdf, y - 1) + v * (_F(cdf, y) - _F(cdf, y - 1)))
+            kmax = max(len(cdf), y + 1, 15)
+            rps_m.append(sum((_F(cdf, j) - (y <= j)) ** 2 for j in range(kmax)))
+            pc = _poisson_cdf(max(x["pl"]["baseline"][k], 0.05), kmax)
+            rps_b.append(sum((pc[j] - (y <= j)) ** 2 for j in range(kmax)))
+            ub.append(_F(pc, y - 1) + v * (_F(pc, y) - _F(pc, y - 1)))
+        u, ub = np.array(u), np.array(ub)
+        hist = np.histogram(u, bins=10, range=(0, 1))[0] / len(u)
+        out[k] = {"n": len(rows), "pit_central80_coverage": round(float(np.mean((u >= .1) & (u <= .9))), 4),
+                  "pit_mean": round(float(u.mean()), 4), "pit_histogram": [round(float(h), 4) for h in hist],
+                  "pit_sd": round(float(u.std()), 4),
+                  "rps_model": round(float(np.mean(rps_m)), 4), "rps_poisson_last10": round(float(np.mean(rps_b)), 4),
+                  "baseline_pit_central80_coverage": round(float(np.mean((ub >= .1) & (ub <= .9))), 4)}
+    return out
 
 
 def _mean(x):

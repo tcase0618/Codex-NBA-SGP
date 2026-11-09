@@ -267,6 +267,8 @@ def test_backtest_walk_forward_scoring(league):
     assert rep["status"] == "MEASURED_WALK_FORWARD"
     assert 0 < rep["game"]["win_prob"]["simulation"]["log_loss"] < 2
     assert rep["players"]["stats"]["pts"]["n"] > 0
+    dist = rep["players"]["distribution"]["pts"]
+    assert dist["n"] > 0 and 0 <= dist["pit_central80_coverage"] <= 1 and len(dist["pit_histogram"]) == 10
     path = B.save(wh, run, rep, out_dir=str(wh.path) + "-bt")
     assert path.exists()
     assert rep["game"]["platt_live"]["games"] == len(ok)
@@ -314,3 +316,23 @@ def test_intel_api_empty_warehouse(tmp_path):
     c = TestClient(app)
     assert c.get("/api/intel/status").json()["status"] == "EMPTY"
     assert c.get("/api/intel/teams").status_code == 503
+
+
+def test_randomized_pit_is_exact_for_a_correct_discrete_forecast():
+    """A perfectly calibrated integer forecast gets ~80% randomized-PIT coverage,
+    while the inclusive p10<=y<=p90 check over-reports (the v1.0 audit's bias)."""
+    from nba_quant.intel import backtest as B
+    rng = np.random.default_rng(0)
+    lam = 1.3
+    cdf = B._poisson_cdf(lam, 30)
+    ys = rng.poisson(lam, 20000)
+    rows = [{"pl": {"cdf": {k: cdf for k in ("pts", "reb", "ast", "fg3m", "stl", "blk", "tov")},
+                    "baseline": {k: lam for k in ("pts", "reb", "ast", "fg3m", "stl", "blk", "tov")}},
+             "act": {k: int(y) for k in ("pts", "reb", "ast", "fg3m", "stl", "blk", "tov")}} for y in ys]
+    d = B.distribution_scores(rows)["blk"]
+    assert d["pit_central80_coverage"] == pytest.approx(0.80, abs=0.015)
+    assert d["rps_model"] == pytest.approx(d["rps_poisson_last10"], rel=1e-6)  # same distribution
+    p10 = next(k for k, f in enumerate(cdf) if f >= .1)
+    p90 = next(k for k, f in enumerate(cdf) if f >= .9)
+    inclusive = np.mean((ys >= p10) & (ys <= p90))
+    assert inclusive > 0.85  # the biased check

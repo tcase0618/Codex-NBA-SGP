@@ -5,6 +5,7 @@
   coverage                 print warehouse coverage
   backtest START END       walk-forward backtest (ISO datetimes), writes output/backtest/*.json
   project HOME AWAY CUTOFF simulate one matchup (team IDs or abbreviations)
+  injuries                 fetch official pregame NBA injury reports for every warehouse game
 """
 import argparse
 import json
@@ -26,6 +27,7 @@ def main(argv=None):
     b = sub.add_parser("backtest"); b.add_argument("start"); b.add_argument("end")
     b.add_argument("--sims", type=int, default=2000); b.add_argument("--workers", type=int, default=4)
     b.add_argument("--max-games", type=int, default=None)
+    sub.add_parser("injuries")
     p = sub.add_parser("project"); p.add_argument("home"); p.add_argument("away"); p.add_argument("cutoff")
     p.add_argument("--sims", type=int, default=10000); p.add_argument("--seed", type=int, default=42)
     args = ap.parse_args(argv)
@@ -46,6 +48,10 @@ def main(argv=None):
         path = B.save(wh, run, report)
         print(json.dumps(report.get("game", report), indent=1)[:4000])
         print(f"saved {path}")
+    elif args.cmd == "injuries":
+        from .injuries import acquire_and_ingest
+        stats = acquire_and_ingest(wh, wh.query("SELECT id, tipoff FROM games ORDER BY tipoff"))
+        print(json.dumps(stats, indent=1))
     elif args.cmd == "project":
         from .engine import Engine
         from .projection import Projector

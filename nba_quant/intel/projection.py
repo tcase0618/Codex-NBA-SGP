@@ -460,6 +460,20 @@ def _dist(x):
             "p75": round(float(q[4]), 2), "p90": round(float(q[5]), 2), "p95": round(float(q[6]), 2)}
 
 
+CDF_STATS = ("pts", "reb", "ast", "fg3m", "stl", "blk", "tov")
+
+
+def _cdf(x, tol=5e-4):
+    """Compact empirical CDF over integers 0..k, trimmed once F >= 1 - tol."""
+    x = np.asarray(x, int)
+    if not len(x):
+        return None
+    counts = np.bincount(np.clip(x, 0, 200))
+    F = np.cumsum(counts) / len(x)
+    k = int(np.searchsorted(F, 1 - tol)) + 1
+    return [round(float(v), 4) for v in F[:k]]
+
+
 def summarize(r, built, cal):
     S = r["sims"]
     score = r["score"]
@@ -506,6 +520,7 @@ def summarize(r, built, cal):
                             "double_double": round(float(np.mean(n10 >= 2)), 4), "triple_double": round(float(np.mean(n10 >= 3)), 4),
                             "correlations": corr, "drivers": drivers(pmeta, built["meta"][1 - s]),
                             "baseline_last10": pmeta.get("baseline_last10"),
+                            "cdf_conditional": {k: _cdf(stats[k][played]) for k in CDF_STATS} if played.sum() >= 20 else None,
                             "inputs": {k: pmeta[k] for k in ("usage", "tov", "foul_draw", "ft_pct", "zone_mix", "zone_fg", "streak_missed", "role", "games_with_team")}})
     hist_edges = np.arange(np.floor(margin.min()) - .5, np.ceil(margin.max()) + 1.5, 1)
     mh, _ = np.histogram(margin, bins=hist_edges)

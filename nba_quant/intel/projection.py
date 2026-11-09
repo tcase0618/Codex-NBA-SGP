@@ -219,7 +219,18 @@ class Projector:
                 seq.append((r["minutes"] if r and not r["dnp"] else 0.0, bool(r and r["starter"] and not r["dnp"])))
         return seq
 
-    def build_inputs(self, home, away, cutoff, scenarios=None, model_cutoff=None):
+    def status_model(self, cutoff):
+        key = ("status", cutoff)
+        if key not in self._cache:
+            from .injuries import fit_status_model
+            try:
+                m = fit_status_model(self.wh, cutoff)
+                self._cache[key] = m if m["table"] else None
+            except Exception:  # availability_rows not built (fresh clone): fall back to streak model
+                self._cache[key] = None
+        return self._cache[key]
+
+    def build_inputs(self, home, away, cutoff, scenarios=None, model_cutoff=None, tipoff=None):
         """`cutoff` bounds roster/minutes/availability history; `model_cutoff`
         (<= cutoff) bounds fitted models and rate aggregates (weekly refits)."""
         cutoff = M.iso(cutoff)
@@ -232,6 +243,7 @@ class Projector:
             raise ValueError("Insufficient history before cutoff to fit team ratings")
         lg = self.league(mc)
         avail = self.availability_model(mc)
+        status_model = self.status_model(mc)
         season = eng.season_for(cutoff)
         prev = self.wh.scalar("SELECT MAX(season) FROM games WHERE season < ?", (season,))
         cur = eng.player_aggs(mc, season) if eng.season_for(mc) == season else {}
@@ -244,6 +256,10 @@ class Projector:
         teams, meta, ff_meta = [], [], {}
         for tid in (home, away):
             roster = self.roster(tid, cutoff)
+            statuses, report_url = (None, None)
+            if status_model and tipoff:
+                from .injuries import report_for
+                statuses, report_url = report_for(self.wh, tid, tipoff, cutoff)
             if len(roster) < 5:
                 raise ValueError(f"Team {tid}: fewer than five rostered players before cutoff")
             t = defaultdict(list)
@@ -261,6 +277,12 @@ class Projector:
                     streak += 1
                 role = _role(mins[-10:])
                 p_active = avail["table"].get(f"{_bucket(streak)}|{role}", 0.5)
+                injury_status, availability_source = None, "streak_model"
+                if statuses is not None:
+                    injury_status = statuses.get(pid, "NotListed")
+                    key = (f"NotListed|{_bucket(streak)}|{role}" if injury_status == "NotListed" else f"{injury_status}|{role}")
+                    if key in status_model["table"]:
+                        p_active, availability_source = status_model["table"][key], "injury_report_model"
                 starts = [s for m, s in hist if m > 0][-10:]
                 recent_rows = self.wh.query("""SELECT pts, reb, ast, fg3m, stl, blk, tov, minutes FROM player_games
                     WHERE player_id=? AND tipoff < ? AND minutes > 0 ORDER BY tipoff DESC LIMIT 10""", (pid, cutoff))
@@ -273,7 +295,7 @@ class Projector:
                 min_sd = max(3.0, float(np.std(mins[-15:])) if len(mins) > 2 else 6.0)
                 s = scen.get(pid, {})
                 if s.get("active_probability") is not None:
-                    p_active = float(s["active_probability"])
+                    p_active, availability_source = float(s["active_probability"]), "scenario"
                 if s.get("minutes") is not None:
                     min_mean, min_sd = float(s["minutes"]), 1.5
                 if s.get("minutes_cap") is not None:
@@ -282,7 +304,8 @@ class Projector:
                                 "active_prob": round(p_active, 4), "start_prob": round(sum(starts) / len(starts), 3) if starts else 0.0,
                                 "min_mean": round(min_mean, 2), "min_sd": round(min_sd, 2), "streak_missed": streak,
                                 "games_with_team": len(mins), "role": role, "rapm": rapm.get(pid, {}), **rates,
-                                "minutes_cap": s.get("minutes_cap"), "baseline_last10": baseline})
+                                "minutes_cap": s.get("minutes_cap"), "baseline_last10": baseline,
+                                "injury_status": injury_status, "availability_source": availability_source})
             players.sort(key=lambda p: -p["min_mean"] * p["active_prob"])
             players = players[:17]
             # Four-factors matchup anchoring: team rate x opponent allowed rate / league.
@@ -306,7 +329,7 @@ class Projector:
                 t["zone_fg"].append(p["zone_fg"])
             t["def_zone_adj"] = defense_zone_adjustment(zone_def.get(tid, {}), lg)
             teams.append(dict(t))
-            meta.append({"team_id": tid, "players": players, "four_factors": {k.split(":")[1]: v for k, v in ff_meta.items() if k.startswith(tid + ":")}, "def_zone_adj": dict(zip(ZONE_KEYS, np.round(t["def_zone_adj"], 4).tolist()))})
+            meta.append({"team_id": tid, "players": players, "injury_report": report_url, "four_factors": {k.split(":")[1]: v for k, v in ff_meta.items() if k.startswith(tid + ":")}, "def_zone_adj": dict(zip(ZONE_KEYS, np.round(t["def_zone_adj"], 4).tolist()))})
         # Team matchup model -> target efficiency and pace.
         tm = models["team"]
         th, ta_ = tm["teams"].get(home), tm["teams"].get(away)
@@ -333,7 +356,9 @@ class Projector:
         return {"inputs": GameInputs(teams, pace, league=lg, neutral=neutral, score_effect=self.score_effect), "meta": meta, "target_ortg": target,
                 "pace": pace, "team_model": {"home": th, "away": ta_, "home_court_per100": hca, "league_ortg": tm["league_ortg"],
                                              "margin_sigma": tm["margin_sigma"], "trained_through": tm["trained_through"]},
-                "availability_model": {k: avail[k] for k in ("family", "trained_through", "note")}, "league": lg}
+                "availability_model": {k: avail[k] for k in ("family", "trained_through", "note")},
+                "status_model": {k: status_model[k] for k in ("family", "trained_through", "status_rates")} if status_model else None,
+                "league": lg}
 
     # ----------------------------------------------------------- calibration + run
     def calibrate_shifts(self, built, seed, pilot=1500):
@@ -356,7 +381,7 @@ class Projector:
                                          self.strength_stretch, self.score_effect], sort_keys=True).encode()).hexdigest()[:24]
         if key in self._cache:
             return self._cache[key]
-        built = self.build_inputs(home, away, cutoff, scenarios, model_cutoff)
+        built = self.build_inputs(home, away, cutoff, scenarios, model_cutoff, tipoff)
         cal = self.calibrate_shifts(built, seed, pilot)
         result = simulate(built["inputs"], sims, seed)
         out = summarize(result, built, cal)
@@ -514,7 +539,8 @@ def summarize(r, built, cal):
             corr["pts~team_pts"] = round(float(np.corrcoef(stats["pts"], team_pts)[0, 1]), 3) if stats["pts"].std() > 0 else None
             players.append({"id": pmeta["id"], "name": pmeta["name"], "team_id": built["meta"][s]["team_id"], "position": pmeta["position"],
                             "active_prob_input": pmeta["active_prob"], "played_prob": round(float(played.mean()), 4),
-                            "start_prob": pmeta["start_prob"], "minutes_input": {"mean": pmeta["min_mean"], "sd": pmeta["min_sd"], "cap": pmeta["minutes_cap"]},
+                            "start_prob": pmeta["start_prob"], "injury_status": pmeta.get("injury_status"),
+                            "availability_source": pmeta.get("availability_source"), "minutes_input": {"mean": pmeta["min_mean"], "sd": pmeta["min_sd"], "cap": pmeta["minutes_cap"]},
                             "foul_trouble_prob": round(float(np.mean(stats["pf"] >= 4)), 4),
                             "stats": dists, "conditional_on_playing": cond, "thresholds": thresholds,
                             "double_double": round(float(np.mean(n10 >= 2)), 4), "triple_double": round(float(np.mean(n10 >= 3)), 4),
@@ -540,7 +566,8 @@ def summarize(r, built, cal):
                            for x in range(int(np.percentile(total, 10)) // 5 * 5, int(np.percentile(total, 90)) + 5, 5)},
             "teams": teams, "players": players, "pace": round(built["pace"], 2), "calibration": cal,
             "checks": r["checks"], "seconds": r["seconds"], "unresolved_ties": r["unresolved_ties"],
-            "team_model": tm, "availability_model": built["availability_model"],
+            "team_model": tm, "availability_model": built["availability_model"], "status_model": built.get("status_model"),
+            "injury_reports": [m.get("injury_report") for m in built["meta"]],
             "league_params": {k: v for k, v in built["league"].items() if k not in ("cutoff",)}}
 
 

@@ -217,6 +217,12 @@ def register(app, db_path=None):
 
         def work():
             t0 = time.time()
+            if req.tipoff and M.iso(req.tipoff) > M.iso(now):
+                try:  # best effort: newest official injury report for a future game
+                    from .injuries import refresh_latest
+                    job["injury_report"] = refresh_latest(st.wh)
+                except Exception as error:
+                    job["injury_report"] = {"error": str(error)[:200]}
             try:
                 out = st.projector.project(req.home_id, req.away_id, cutoff, sims=req.simulations, seed=req.seed,
                                            scenarios=[s.model_dump() for s in req.scenarios], tipoff=req.tipoff)

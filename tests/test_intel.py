@@ -336,3 +336,38 @@ def test_randomized_pit_is_exact_for_a_correct_discrete_forecast():
     p90 = next(k for k, f in enumerate(cdf) if f >= .9)
     inclusive = np.mean((ys >= p10) & (ys <= p90))
     assert inclusive > 0.85  # the biased check
+
+
+def test_injury_report_token_parser_edge_cases():
+    from nba_quant.intel.injuries import parse_tokens, to_first_last, _norm
+    text = ("Injury Report: 01/15/26 05:00 PM Page 1 of 2 Game Date Game Time Matchup Team Player Name Current Status Reason "
+            "01/15/2026 07:00 (ET) OKC@MIA Oklahoma City Thunder Gilgeous- Alexander, Shai Questionable Injury/Illness - Left Ankle; Sprain "
+            "Pippen Jr., Scotty Out Injury/Illness - Left Great Toe; Surgery, Recovery Williams, Jalen Probable Rest "
+            "Miami Heat NOT YET SUBMITTED")
+    teams = parse_tokens(text.split())["teams"]
+    okc = teams["Oklahoma City Thunder"]["players"]
+    assert [(p["name"], p["status"]) for p in okc] == [("Gilgeous-Alexander, Shai", "Questionable"),
+                                                      ("Pippen Jr., Scotty", "Out"), ("Williams, Jalen", "Probable")]
+    assert teams["Oklahoma City Thunder"]["submitted"] and not teams["Miami Heat"]["submitted"]
+    assert _norm(to_first_last("Pippen Jr., Scotty")) == _norm("Scotty Pippen Jr.")
+
+
+def test_injury_report_respects_cutoff(league):
+    import json as _json
+    from nba_quant.intel.injuries import _ensure_tables, report_for
+    wh, _ = league
+    with wh.connect() as db:
+        _ensure_tables(db)
+        db.execute("INSERT OR REPLACE INTO injury_reports VALUES(?,?,?,?,?,?)",
+                   ("u-early", "2025-11-01T21:00Z", "2025-11-01", "x", _json.dumps(["1"]), "[]"))
+        db.execute("INSERT OR REPLACE INTO injury_reports VALUES(?,?,?,?,?,?)",
+                   ("u-late", "2025-11-01T23:30Z", "2025-11-01", "x", _json.dumps(["1"]), "[]"))
+        db.execute("INSERT OR REPLACE INTO injuries VALUES(?,?,?,?,?,?)", ("1", "100", "Questionable", "", "2025-11-01T21:00Z", "u-early"))
+        db.execute("INSERT OR REPLACE INTO injuries VALUES(?,?,?,?,?,?)", ("1", "100", "Out", "", "2025-11-01T23:30Z", "u-late"))
+    # Tipoff 8 PM ET; cutoff 23:00Z precedes the late report, so only the early listing is usable.
+    status, url = report_for(wh, "1", "2025-11-02T00:00Z", "2025-11-01T23:00Z")
+    assert url == "u-early" and status == {"100": "Questionable"}
+    status, url = report_for(wh, "1", "2025-11-02T00:00Z", "2025-11-01T23:45Z")
+    assert url == "u-late" and status == {"100": "Out"}
+    status, url = report_for(wh, "2", "2025-11-02T00:00Z", "2025-11-01T23:45Z")
+    assert status is None  # team 2 had not submitted: no information, not "all available"

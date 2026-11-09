@@ -50,7 +50,9 @@ def main(argv=None):
         print(f"saved {path}")
     elif args.cmd == "injuries":
         from .injuries import acquire_and_ingest
+        from .injuries import build_availability_rows
         stats = acquire_and_ingest(wh, wh.query("SELECT id, tipoff FROM games ORDER BY tipoff"))
+        stats["availability_rows"] = build_availability_rows(wh)
         print(json.dumps(stats, indent=1))
     elif args.cmd == "project":
         from .engine import Engine

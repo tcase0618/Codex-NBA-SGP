@@ -371,3 +371,28 @@ def test_injury_report_respects_cutoff(league):
     assert url == "u-late" and status == {"100": "Out"}
     status, url = report_for(wh, "2", "2025-11-02T00:00Z", "2025-11-01T23:45Z")
     assert status is None  # team 2 had not submitted: no information, not "all available"
+
+
+def test_parlays_price_legs_jointly(league):
+    import math as _math
+    from nba_quant.intel.engine import Engine
+    from nba_quant.intel.parlays import american, best_combo, best_correlated, legs_for_game, simulate_game, ticket
+    from nba_quant.intel.projection import Projector
+    wh, _ = league
+    eng = Engine(wh)
+    pj = Projector(eng)
+    names = {t["id"]: t for t in wh.query("SELECT * FROM teams")}
+    built, r = simulate_game(pj, "1", "2", eng.latest_cutoff(), None, sims=3000, seed=4)
+    legs, S = legs_for_game(built, r, names, {"home_spread": -2.5, "total": 220.5}, min_play=0.0, min_minutes=10)
+    assert any(l["kind"] == "game" for l in legs) and any(l["kind"] == "player" for l in legs)
+    best = best_combo(legs, 3, .3, .95)
+    assert best
+    p, combo = best
+    t = ticket(p, combo, S, "same-game")
+    joint = np.logical_and.reduce([l["hit"] for l in combo]).mean()
+    assert t["probability"] == pytest.approx(joint, abs=1e-4)  # priced from the same simulated games
+    assert t["independent_product"] == pytest.approx(_math.prod(l["p"] for l in combo), abs=1e-4)
+    corr = best_correlated(legs, 3, joint_lo=.1, joint_hi=.6, leg_lo=.2, leg_hi=.95)
+    if corr:
+        assert .1 <= corr[0] <= .6
+    assert american(0.5) == -100 and american(0.25) == 300 and american(0.8) == -400

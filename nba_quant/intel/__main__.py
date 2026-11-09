@@ -6,6 +6,7 @@
   backtest START END       walk-forward backtest (ISO datetimes), writes output/backtest/*.json
   project HOME AWAY CUTOFF simulate one matchup (team IDs or abbreviations)
   injuries                 fetch official pregame NBA injury reports for every warehouse game
+  parlays [YYYY-MM-DD]     correlation-aware parlays for a day's unplayed games (writes output/parlays/)
 """
 import argparse
 import json
@@ -28,6 +29,7 @@ def main(argv=None):
     b.add_argument("--sims", type=int, default=2000); b.add_argument("--workers", type=int, default=4)
     b.add_argument("--max-games", type=int, default=None)
     sub.add_parser("injuries")
+    pl = sub.add_parser("parlays"); pl.add_argument("day", nargs="?"); pl.add_argument("--sims", type=int, default=20000)
     p = sub.add_parser("project"); p.add_argument("home"); p.add_argument("away"); p.add_argument("cutoff")
     p.add_argument("--sims", type=int, default=10000); p.add_argument("--seed", type=int, default=42)
     args = ap.parse_args(argv)
@@ -54,6 +56,19 @@ def main(argv=None):
         stats = acquire_and_ingest(wh, wh.query("SELECT id, tipoff FROM games ORDER BY tipoff"))
         stats["availability_rows"] = build_availability_rows(wh)
         print(json.dumps(stats, indent=1))
+    elif args.cmd == "parlays":
+        from datetime import datetime as dt_, timezone as tz_
+        from zoneinfo import ZoneInfo
+        from .acquire import scoreboard
+        from .engine import Engine
+        from .injuries import refresh_latest
+        from .parlays import build_slate, save
+        from .projection import Projector
+        day = date.fromisoformat(args.day) if args.day else dt_.now(tz_.utc).astimezone(ZoneInfo("America/New_York")).date()
+        print("latest injury report:", refresh_latest(wh))
+        names = {t["id"]: t for t in wh.query("SELECT * FROM teams")}
+        slate = build_slate(Projector(Engine(wh)), scoreboard(day, refresh=True), names, sims=args.sims)
+        print("saved", *save(slate))
     elif args.cmd == "project":
         from .engine import Engine
         from .projection import Projector

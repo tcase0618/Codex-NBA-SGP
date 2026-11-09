@@ -307,7 +307,7 @@ def register(app, db_path=None):
                      "lambda": rapm.get("lambda"), "home_court_per100": rapm.get("home_court_per100")},
                     {"family": "team_ridge", **{k: (mdl["team"] or {}).get(k) for k in ("trained_through", "games", "lambda", "half_life_days", "home_court_per100", "league_ortg", "league_pace", "margin_sigma")}},
                     {"family": "availability_markov_table", **st.projector.availability_model(c)},
-                    {"family": "possession_simulation", "version": "possession-sim-1.1",
+                    {"family": "possession_simulation", "version": "possession-sim-1.2",
                      "note": "Event-level simulator; team efficiency anchored to team_ridge with RAPM availability adjustment; turnovers/fouls anchored to four-factors matchup."}],
                 "promotion_policy": "No model is auto-promoted on training fit. A change ships only if walk-forward log loss/MAE improve on the same games."}
 

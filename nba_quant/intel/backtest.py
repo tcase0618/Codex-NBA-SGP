@@ -107,7 +107,7 @@ def run(wh, start, end, sims=2000, seed=11, workers=4, progress=print, max_games
         for f in forecasts:
             if "error" not in f:
                 db.execute("INSERT OR REPLACE INTO model_predictions VALUES(?,?,?,?,?,?)", (
-                    f"{run_id}:{f['game_id']}", "possession-sim-1.1", f["game_id"], created, f["cutoff"], json.dumps(f)))
+                    f"{run_id}:{f['game_id']}", "possession-sim-1.2", f["game_id"], created, f["cutoff"], json.dumps(f)))
     return {"run_id": run_id, "created_at": created, "forecasts": forecasts, "start": start, "end": end, "sims": sims,
             "config": config or {}}
 
@@ -363,10 +363,10 @@ def apply_platt(live, p):
 def save(wh, run, report, out_dir="output/backtest"):
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     payload = {"run_id": run["run_id"], "created_at": run["created_at"], "start": run["start"], "end": run["end"],
-               "sims_per_game": run["sims"], "model_version": "possession-sim-1.1", "report": report}
+               "sims_per_game": run["sims"], "model_version": "possession-sim-1.2", "report": report}
     with wh.connect() as db:
         db.execute("INSERT OR REPLACE INTO validation_results VALUES(?,?,?,?,?)", (
-            run["run_id"], run["created_at"], "walk_forward_backtest", "possession-sim-1.1", json.dumps(payload)))
+            run["run_id"], run["created_at"], "walk_forward_backtest", "possession-sim-1.2", json.dumps(payload)))
     path = Path(out_dir) / f"backtest-{run['run_id'][:8]}.json"
     path.write_text(json.dumps(payload, indent=1))
     return path

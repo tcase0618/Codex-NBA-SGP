@@ -21,7 +21,7 @@ from .sim import GameInputs, ZONES, simulate
 ZONE_KEYS = ("rim", "sm", "lm", "c3", "ab3")
 ZONE_DB = {"rim": "rim", "short_midrange": "sm", "long_midrange": "lm", "corner_three": "c3", "above_break_three": "ab3"}
 ZONE_PRIOR_K = {"rim": 50, "sm": 80, "lm": 80, "c3": 150, "ab3": 200}  # heavy shrinkage on threes
-SIM_VERSION = "possession-sim-1.1"
+SIM_VERSION = "possession-sim-1.2"
 # Walk-forward-tuned calibration of the simulator inputs (see docs, section 8):
 # STRENGTH_STRETCH widens the two teams' efficiency targets about their mean
 # (time-decayed ridge ratings shrink team differences); SCORE_EFFECT is the
@@ -29,7 +29,10 @@ SIM_VERSION = "possession-sim-1.1"
 # observed forecast residuals. Both were set on Dec 2025-Feb 2026 games only.
 STRENGTH_STRETCH = 1.17
 # Player-layer knobs (walk-forward tuned; see docs section 8).
-PLAYER_DEFAULTS = {"min_sd_scale": 1.0, "prev_weight": 0.5, "recent_weight": 0.0, "recent_days": 30, "shrink_scale": 1.0}
+# Coordinate search on Dec 2025-Feb 2026 (every 3rd game), objective = summed player RPS:
+# baseline 7.425 -> 7.351 with recency weight 1.0, minutes SD x0.7, shrinkage x0.5.
+# prev_weight could not be tuned (no prior season in the 2025-26 window).
+PLAYER_DEFAULTS = {"min_sd_scale": 0.7, "prev_weight": 0.5, "recent_weight": 1.0, "recent_days": 30, "shrink_scale": 0.5}
 SCORE_EFFECT = 0.035
 COMBOS = {"pra": ("pts", "reb", "ast"), "pr": ("pts", "reb"), "pa": ("pts", "ast"), "ra": ("reb", "ast"),
           "stocks": ("stl", "blk"), "fg3m_pts": ("pts",)}

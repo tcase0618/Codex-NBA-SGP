@@ -102,7 +102,7 @@ Archetypes are multi-label (14 roles) and assigned by documented thresholds on d
 |---|---|
 | Shot quality (xFG) | L2 logistic, Newton/IRLS; distance hinges, zone, shot family, possession clock, second chance, transition, game state. Holdout (last 15% of shots): log loss 0.637 vs 0.689 base rate, well calibrated |
 | RAPM | Possession-weighted ridge on stints, separate O/D coefficients + home court, λ = 3000 (APM λ = 300). Posterior SD reported |
-| Team ratings | Time-decayed (60-day half-life) ridge of per-100 scoring on offense, opponent defense and home court; margin σ from residuals |
+| Team ratings | Time-decayed (120-day half-life, λ = 12; grid-tuned walk-forward) ridge of per-100 scoring on offense, opponent defense and home court; margin σ from residuals |
 | Lineups | Adjusted net = (poss·net + 400·ΣRAPM)/(poss + 400); interaction = adjusted − talent prior |
 | Availability | Laplace-smoothed P(plays) by missed-game streak × recent-minutes role, fitted on player-team sequences |
 | Minutes | EWMA (half-life 5 games) shrunk to the window mean; SD from the player's history |
@@ -113,6 +113,7 @@ Archetypes are multi-label (14 roles) and assigned by documented thresholds on d
 - **Minutes allocation.** Sampled minutes are trimmed from the bottom of the rotation first.
 - **Possession flow.** Usage-weighted actor → turnover (with optional steal) | shooting-foul trip | FGA. A FGA takes its zone from the player's shrunk shot mix, and its make probability from shrunk zone FG% + the opponent's zone-defense logit shift + a team calibration shift. Then come blocks, assists (from four eligible teammates) and and-ones; misses go to a rebound decided by lineup rebounding balance; an offensive rebound continues the possession.
 - **Team anchoring.** The calibration shift is solved from two pilot runs so each team's simulated points per possession hit the team-ridge matchup expectation plus the RAPM change implied by projected availability. Turnover and foul-trip rates are anchored to a four-factors matchup (team rate × opponent allowed rate ÷ league).
+- **Spread calibration (v1.1).** Before simulation, the two teams' efficiency targets are widened about their mean by `STRENGTH_STRETCH = 1.17`, because ridge ratings shrink team differences. A score effect of `SCORE_EFFECT = 0.035` logit per 10-point lead (negative for the leader) is applied to make probabilities. Independent possessions otherwise overstate margin variance, because real leaders ease off and trailers press. Both constants were set on Dec 2025–Feb 2026 games only, and both act on inputs, so every output still comes from one event stream.
 - **Asserted on every run.** Points = 2·FGM + 3PM + FTM; team score = Σ player points; minutes = 240 + 25·OT; assists ≤ FGM; steals ≤ opponent turnovers; blocks ≤ opponent misses.
 - **Outputs.** Mean, median, SD and p05–p95 for every box stat and for PRA/PR/PA/RA/stocks summed inside each simulated game; threshold ladders; double/triple-double rates; joint correlations; quarter scoring; margin/total histograms; spread/total ladders; MC standard error.
 - **Performance.** 1k sims ≈ 3 s, 10k ≈ 6 s, 50k ≈ 32 s (4 vCPU, including the two calibration pilots). Results are cached by input hash and seeded.
@@ -129,9 +130,29 @@ Archetypes are multi-label (14 roles) and assigned by documented thresholds on d
 python -m nba_quant.intel backtest 2025-11-17T12:00Z 2026-06-25T00:00Z --sims 2000 --workers 3
 ```
 
-Measured numbers are in section 8.
+Measured numbers, including the v1.0 → v1.1 comparison, are in section 8.
 
 ## 8. Results
+
+### v1.1 vs v1.0 on validation games only
+
+Measured 2026-11-09. v1.1 changes the team-ratings half-life (60 → 120 days) and adds the spread calibration in section 6. All v1.1 settings were chosen on Dec 2025–Feb 2026 games, so only the windows below count as evidence.
+
+| Window | Games | v1.0 log loss | **v1.1 log loss** | Market ML | Margin MAE v1.0 → v1.1 | Market margin MAE | 80% margin coverage v1.0 → v1.1 |
+|---|---|---|---|---|---|---|---|
+| Mar 2 – Jun 25, 2026 | 409 | 0.5687 | **0.5546** | 0.5001 | 11.98 → 11.92 | 11.03 | 85.3% → **79.7%** |
+| 2026-27 to Nov 7 | 96 | 0.6279 | **0.5838** | 0.5486 | 11.89 → **11.31** | 10.70 | 86.5% → **80.2%** |
+| Dec–Feb (tuning, in-sample) | 607 | 0.6444 | 0.6395 | 0.6270 | 11.85 → 11.66 | 11.38 | 87.0% → 81.2% |
+
+**Diagnosis that motivated v1.1.** Under v1.0, simulated margin SD was 17.1 against an observed forecast-residual SD of 14.9, and actual margins ran 1.32× the ratings margins. The simulator tracked the ratings almost exactly (slope 1.04, r = 0.97), so the compression came from the ratings model, not the simulator.
+
+Under v1.1, the simulated margin SD (14.8) matches the residual SD (15.0), and 80% intervals cover 80%. On the full 2025-26 season the simulator now beats the ratings-only model (log loss 0.6026 vs 0.6068); under v1.0 it lost (0.6125 vs 0.6085).
+
+**Calibration gate.** Walk-forward Platt scaling helped v1.0 (0.6117 → 0.6041, confirmed out of sample on 2026-27: 0.6279 → 0.6144). On v1.1 it slightly *hurts* (0.6024 → 0.6034 on the same 958 games). A calibration layer is deployed only if it beats the raw model walk-forward, for the same simulator version, so v1.1 ships the raw simulated probability.
+
+Player projections are unchanged by v1.1. Points MAE is 4.75 on Mar–Jun for both versions.
+
+### v1.0 detail (superseded, kept for the record)
 
 Measured on 2026-11-08 with `possession-sim-1.0`, 2,000 simulations per game and weekly refits. Every number below is walk-forward on archived data, not a live prospective record. No historical injury reports were used.
 
@@ -177,10 +198,10 @@ Availability (played vs not, 34% DNP base rate among rostered players): Brier 0.
 
 ### What this means, plainly
 
-- **Game-level skill is real.** Log loss is well below a coin flip and stays that way out of sample.
-- **The model does not beat the closing-quality market.** Both margin MAE and moneyline log loss trail the DraftKings line. Treat the model as a research and scenario tool, not an edge.
-- **Player means are no better than a last-10-games average**, and the intervals are too wide (they cover 88–95% instead of 80%). The next work items are reducing simulator dispersion (per-player shooting noise and minutes SD) and adding real availability data.
-- **No model was auto-promoted.** The calibrated win probability is the only post-hoc change, and it was validated out of sample before it was enabled.
+- **Game-level skill is real and now well calibrated.** v1.1 improves log loss on both validation windows, and its margin intervals cover what they claim.
+- **The model still does not beat the market.** It trails the DraftKings moneyline by 0.035–0.055 log loss and the spread by about 0.6–0.9 points of margin MAE. Treat it as a research and scenario tool, not an edge. The gap halved on 2026-27, which is where the remaining modeling work should aim.
+- **Player means are no better than a last-10-games average.** That is the weakest component. Its interval over-coverage (88–95%) is partly real overdispersion and partly the inclusive quantile check on integer counts. A randomized-PIT evaluation is the next fix to the measurement itself.
+- **Nothing ships on training fit.** Every v1.1 setting was tuned on Dec–Feb and judged on later games, and the calibration layer is gated on walk-forward evidence.
 
 ## 9. Terminal workspaces
 
@@ -197,6 +218,6 @@ Availability (played vs not, 34% DNP base rate among rostered players): Brier 0.
 
 1. **Historical injury reports.** Availability is modeled from participation only. Ingesting time-stamped official reports is the largest expected gain for player forecasts.
 2. **Tracking and play-type data** require a license. 53 team, 33 universal and 62 positional slots stay `UNAVAILABLE` until then.
-3. **Tuning.** Shrinkage constants, RAPM λ and simulator priors are fixed, documented choices that have not been tuned. Tuning them on the walk-forward set (with a held-out season) is the next modeling step.
+3. **Tuning.** Done for the game layer in v1.1 (ratings half-life, spread stretch, score effect). The player layer is next: shrinkage constants, minutes SD, per-player shooting noise, and RAPM λ, tuned the same way on a held-out window.
 4. **AutoGluon/XGBoost.** These remain in the existing shadow framework (`ml_*`) and are not wired into the intelligence stack. Any promotion must beat the walk-forward numbers above on the same games.
 5. **Production.** This is a single-node SQLite deployment. Moving to Postgres + Parquet and scheduled ingestion (`acquire` + `build` nightly) is straightforward but not done.

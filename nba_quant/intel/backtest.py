@@ -290,9 +290,15 @@ def latest_platt(wh, model_version=None):
     from .projection import SIM_VERSION
     version = model_version or SIM_VERSION
     for r in wh.query("SELECT payload FROM validation_results WHERE kind='walk_forward_backtest' AND model_version=? ORDER BY created_at DESC", (version,)):
-        live = json.loads(r["payload"])["report"].get("game", {}).get("platt_live")
-        if live and live["games"] >= 300:
-            return live
+        game = json.loads(r["payload"])["report"].get("game", {})
+        live = game.get("platt_live")
+        wf = game.get("win_prob", {}).get("simulation_platt_walkforward")
+        # Deployment gate: only if walk-forward Platt beat the raw simulation on the same games.
+        if not live or live["games"] < 300 or not wf:
+            continue  # too small to decide; fall back to an older, larger run
+        if wf["log_loss"] < wf["raw_log_loss_same_games"]:
+            return {**live, "walk_forward_log_loss": wf["log_loss"], "raw_log_loss": wf["raw_log_loss_same_games"]}
+        return None
     return None
 
 

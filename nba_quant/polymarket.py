@@ -4,6 +4,7 @@ Gamma metadata prices are explicitly indicative. Only a fresh, validated CLOB
 ask book can produce a depth-backed quote. This module never authenticates,
 places orders, requests RFQs or constructs joint/parlay prices.
 """
+import gzip
 import hashlib
 import json
 import math
@@ -50,11 +51,15 @@ def fetch_public_json(url, output_dir):
         raise ValueError("Only documented public Gamma sports/events and CLOB book GET requests are permitted")
     status, error = None, None
     try:
-        with urlopen(Request(url, headers={"User-Agent": "CaseCapitalNBAQuant/0.1 public-data"}), timeout=20) as response:
+        # Gamma /events now returns 406 "gzip_required" unless the client accepts gzip (seen 2026-11-13).
+        headers = {"User-Agent": "CaseCapitalNBAQuant/0.1 public-data", "Accept-Encoding": "gzip"}
+        with urlopen(Request(url, headers=headers), timeout=20) as response:
             if urlparse(response.geturl()).netloc != parsed.netloc:
                 raise ValueError("Unexpected Polymarket redirect host")
             status = response.status
             raw = response.read(20_000_001)
+            if response.headers.get("Content-Encoding", "").lower() == "gzip":
+                raw = gzip.decompress(raw)
     except HTTPError as exc:
         status, error = exc.code, str(exc)
         raw = exc.read(100_001)

@@ -54,7 +54,7 @@ def main_nba(path):
         return grade_val(v, l["line"], fin), v
     out = []
     for i, r in enumerate(rows):
-        if r.get("type") == "ticket":
+        if r.get("type") == "ticket" and r.get("legs"):
             g = [leg_grade(l, r.get("game_id")) for l in r["legs"]]
             out.append({"ref": i, "kind": "ticket", "slot": r["slot"], "name": r["name"], "result": combine([x[0] for x in g]),
                         "legs": [f'{l["player"]} o{l["line"]} {l["stat"]}: {v} {gr}' for l, (gr, v) in zip(r["legs"], g)],

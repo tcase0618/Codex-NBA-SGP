@@ -63,7 +63,8 @@ def fetch_public_json(url, output_dir):
     except HTTPError as exc:
         status, error = exc.code, str(exc)
         raw = exc.read(100_001)
-    if len(raw) > 20_000_000:
+    # Decompressed cap is larger than the 20 MB wire cap: a full NBA slate's /events JSON passed 20 MB on 2026-11-18.
+    if len(raw) > 80_000_000:
         raise ValueError("Polymarket response exceeds bounded read limit")
     sha = hashlib.sha256(raw).hexdigest()
     path = Path(output_dir) / "raw" / f"{sha}.json"

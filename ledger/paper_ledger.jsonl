@@ -678,3 +678,78 @@
 {"type": "paper_order", "slot": "2026-11-17 22:30ET", "logged_at": "2026-11-18T02:31:27.234855+00:00", "venue": "polymarket.com (international CLOB, read-only quote)", "executable_for_account": false, "side": "over", "price": 0.61, "units": 1, "game_id": "401910005", "player": "Ryan Kalkbrenner", "stat": "reb", "line": 3.5, "ask": 0.61, "proxy_p": 0.7333, "edge": 0.202, "asset_id": "51238021560568158218169297893859674993062463422339871001653836736345367911563", "status": "OPEN"}
 {"type": "paper_order", "slot": "2026-11-17 22:30ET", "logged_at": "2026-11-18T02:31:27.234855+00:00", "venue": "polymarket.com (international CLOB, read-only quote)", "executable_for_account": false, "side": "over", "price": 0.61, "units": 1, "game_id": "401910005", "player": "Jake LaRavia", "stat": "ast", "line": 1.5, "ask": 0.61, "proxy_p": 0.6667, "edge": 0.093, "asset_id": "76234880073331458190783615204326184927854818719357037105903251700524258365296", "status": "OPEN"}
 {"type": "paper_order", "slot": "2026-11-17 22:30ET", "logged_at": "2026-11-18T02:31:27.234855+00:00", "venue": "polymarket.com (international CLOB, read-only quote)", "executable_for_account": false, "side": "over", "price": 0.32, "units": 1, "game_id": "401910005", "player": "Sion James", "stat": "pts", "line": 9.5, "ask": 0.32, "proxy_p": 0.3667, "edge": 0.146, "asset_id": "6993971359987873579871137296854055980992513355104615185874810320503524322793", "status": "OPEN"}
+{"type": "settlement", "ref_row": 598, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "legs": ["Ja'Kobe Walter o3.5 reb: 1 LOST", "OG Anunoby o1.5 ast: 0 LOST", "Immanuel Quickley o9.5 pts: 14 WON"], "pnl_units_at_fair": -1.0}
+{"type": "settlement", "ref_row": 599, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "legs": ["Ja'Kobe Walter o3.5 reb: 1 LOST", "Jakob Poeltl o5.5 reb: 6 WON", "RJ Barrett o1.5 ast: 5 WON", "Immanuel Quickley o9.5 pts: 14 WON", "Josh Hart o1.5 ast: 2 WON"], "pnl_units_at_fair": -1.0}
+{"type": "settlement", "ref_row": 600, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "legs": ["Ja'Kobe Walter o3.5 reb: 1 LOST", "Jakob Poeltl o5.5 reb: 6 WON", "Mikal Bridges o3.5 reb: 5 WON", "RJ Barrett o1.5 ast: 5 WON", "Immanuel Quickley o9.5 pts: 14 WON", "Josh Hart o1.5 ast: 2 WON", "OG Anunoby o9.5 pts: 16 WON", "Landry Shamet o4.5 pts: 12 WON"], "pnl_units_at_fair": -1.0}
+{"type": "settlement", "ref_row": 601, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.23, "actual": 5}
+{"type": "settlement", "ref_row": 602, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.17, "actual": 2}
+{"type": "settlement", "ref_row": 603, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.54, "actual": 6}
+{"type": "settlement", "ref_row": 604, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.63, "actual": 5}
+{"type": "settlement", "ref_row": 605, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.17, "actual": 12}
+{"type": "settlement", "ref_row": 606, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.57, "actual": 1}
+{"type": "settlement", "ref_row": 607, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.44, "actual": 2}
+{"type": "settlement", "ref_row": 608, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.66, "actual": 5}
+{"type": "settlement", "ref_row": 609, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.15, "actual": 16}
+{"type": "settlement", "ref_row": 610, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.57, "actual": 0}
+{"type": "settlement", "ref_row": 611, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.23, "actual": 22}
+{"type": "settlement", "ref_row": 612, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.11, "actual": 5}
+{"type": "settlement", "ref_row": 613, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.16, "actual": 14}
+{"type": "settlement", "ref_row": 614, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.5, "actual": 1}
+{"type": "settlement", "ref_row": 615, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.32, "actual": 6}
+{"type": "settlement", "ref_row": 616, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.43, "actual": 25}
+{"type": "settlement", "ref_row": 617, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.48, "actual": 1}
+{"type": "settlement", "ref_row": 618, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.57, "actual": 8}
+{"type": "settlement", "ref_row": 619, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "legs": ["Scoot Henderson o1.5 reb: 1 LOST", "Jaden McDaniels o9.5 pts: 22 WON", "Jrue Holiday o9.5 pts: 23 WON"], "pnl_units_at_fair": -1.0}
+{"type": "settlement", "ref_row": 622, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "legs": ["Julian Champagnie o1.5 fg3m: 4 WON", "Ausar Thompson o1.5 ast: 12 WON", "Dylan Harper o9.5 pts: 20 WON"], "pnl_units_at_fair": 1.03}
+{"type": "settlement", "ref_row": 623, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "legs": ["Julian Champagnie o9.5 pts: 14 WON", "Devin Vassell o3.5 reb: 5 WON", "Ausar Thompson o1.5 ast: 12 WON", "Dylan Harper o9.5 pts: 20 WON", "Victor Wembanyama o19.5 pts: 25 WON"], "pnl_units_at_fair": 6.83}
+{"type": "settlement", "ref_row": 625, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.28, "actual": 23}
+{"type": "settlement", "ref_row": 626, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.51, "actual": 7}
+{"type": "settlement", "ref_row": 627, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.12, "actual": 22}
+{"type": "settlement", "ref_row": 628, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.18, "actual": 4}
+{"type": "settlement", "ref_row": 629, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.33, "actual": 10}
+{"type": "settlement", "ref_row": 630, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.85, "actual": 2}
+{"type": "settlement", "ref_row": 631, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.6, "actual": 1}
+{"type": "settlement", "ref_row": 632, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.74, "actual": 6}
+{"type": "settlement", "ref_row": 633, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.43, "actual": 5}
+{"type": "settlement", "ref_row": 634, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.44, "actual": 12}
+{"type": "settlement", "ref_row": 635, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.52, "actual": 5}
+{"type": "settlement", "ref_row": 636, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.32, "actual": 4}
+{"type": "settlement", "ref_row": 637, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.2, "actual": 6}
+{"type": "settlement", "ref_row": 638, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.6, "actual": 14}
+{"type": "settlement", "ref_row": 639, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.43, "actual": 0}
+{"type": "settlement", "ref_row": 640, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.37, "actual": 4}
+{"type": "settlement", "ref_row": 641, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.44, "actual": 14}
+{"type": "settlement", "ref_row": 642, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.09, "actual": 12}
+{"type": "settlement", "ref_row": 643, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.14, "actual": 20}
+{"type": "settlement", "ref_row": 644, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.63, "actual": 2}
+{"type": "settlement", "ref_row": 645, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.15, "actual": 25}
+{"type": "settlement", "ref_row": 646, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.21, "actual": 4}
+{"type": "settlement", "ref_row": 647, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "legs": ["Kris Dunn o9.5 pts: 2 LOST", "Darryn Peterson o3.5 ast: 2 LOST", "Derrick Jones Jr. o3.5 reb: 1 LOST"], "pnl_units_at_fair": -1.0}
+{"type": "settlement", "ref_row": 650, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "legs": ["Luka Doncic o4.5 fg3m: 5 WON", "Ryan Kalkbrenner o3.5 reb: 3 LOST", "Ziaire Williams o4.5 pts: 0 LOST"], "pnl_units_at_fair": -1.0}
+{"type": "settlement", "ref_row": 653, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.2, "actual": 2}
+{"type": "settlement", "ref_row": 654, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.59, "actual": 5}
+{"type": "settlement", "ref_row": 655, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.58, "actual": 5}
+{"type": "settlement", "ref_row": 656, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.6, "actual": 23}
+{"type": "settlement", "ref_row": 657, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.13, "actual": 5}
+{"type": "settlement", "ref_row": 658, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.62, "actual": 1}
+{"type": "settlement", "ref_row": 659, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.24, "actual": 20}
+{"type": "settlement", "ref_row": 660, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.26, "actual": 5}
+{"type": "settlement", "ref_row": 661, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.48, "actual": 5}
+{"type": "settlement", "ref_row": 662, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.8, "actual": 1}
+{"type": "settlement", "ref_row": 663, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.42, "actual": 4}
+{"type": "settlement", "ref_row": 664, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.34, "actual": 5}
+{"type": "settlement", "ref_row": 665, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.62, "actual": 2}
+{"type": "settlement", "ref_row": 666, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.33, "actual": 15}
+{"type": "settlement", "ref_row": 667, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.46, "actual": 2}
+{"type": "settlement", "ref_row": 668, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.42, "actual": 0}
+{"type": "settlement", "ref_row": 669, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.22, "actual": 36}
+{"type": "settlement", "ref_row": 670, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.43, "actual": 5}
+{"type": "settlement", "ref_row": 671, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.12, "actual": 23}
+{"type": "settlement", "ref_row": 672, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.33, "actual": 3}
+{"type": "settlement", "ref_row": 673, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.84, "actual": 0}
+{"type": "settlement", "ref_row": 674, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.18, "actual": 5}
+{"type": "settlement", "ref_row": 675, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.4, "actual": 2}
+{"type": "settlement", "ref_row": 676, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.53, "actual": 6}
+{"type": "settlement", "ref_row": 677, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.61, "actual": 3}
+{"type": "settlement", "ref_row": 678, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.39, "actual": 2}
+{"type": "settlement", "ref_row": 679, "settled_at": "2026-11-18T09:42:25.015695+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.32, "actual": 3}

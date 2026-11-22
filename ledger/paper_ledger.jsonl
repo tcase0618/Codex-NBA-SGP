@@ -1152,3 +1152,7 @@
 {"type": "settlement", "ref_row": 1110, "settled_at": "2026-11-22T09:42:38.310934+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.44, "actual": 15}
 {"type": "settlement", "ref_row": 1111, "settled_at": "2026-11-22T09:42:38.310934+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.83, "actual": 1}
 {"type": "settlement", "ref_row": 1112, "settled_at": "2026-11-22T09:42:38.310934+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.31, "actual": 5}
+{"type": "ticket", "slot": "2026-11-22 15:30ET", "game_id": "401910029", "name": "3-leg", "logged_at": "2026-11-22T19:31:26.967215+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-22 15:30ET", "game_id": "401910029", "name": "5-leg", "logged_at": "2026-11-22T19:31:26.967215+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-22 15:30ET", "game_id": "401910029", "name": "8-leg", "logged_at": "2026-11-22T19:31:26.967215+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "paper_order", "slot": "2026-11-22 15:30ET", "logged_at": "2026-11-22T19:31:26.967215+00:00", "venue": "polymarket.com (international CLOB, read-only quote)", "executable_for_account": false, "side": "over", "price": 0.64, "units": 1, "game_id": "401910029", "player": "Aaron Wiggins", "stat": "ast", "line": 1.5, "ask": 0.64, "proxy_p": 0.81, "edge": 0.266, "asset_id": "28016437050076547723217800283320187694999792905915441946268702511434453516890", "status": "OPEN"}

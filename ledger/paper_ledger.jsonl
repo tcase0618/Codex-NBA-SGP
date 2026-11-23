@@ -1191,3 +1191,18 @@
 {"type": "settlement", "ref_row": 1181, "settled_at": "2026-11-23T09:41:55.139883+00:00", "source": "ESPN final box score", "result": "LOST", "pnl_units": -0.7, "actual": 0}
 {"type": "settlement", "ref_row": 1182, "settled_at": "2026-11-23T09:41:55.139883+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.37, "actual": 1}
 {"type": "settlement", "ref_row": 1183, "settled_at": "2026-11-23T09:41:55.139883+00:00", "source": "ESPN final box score", "result": "WON", "pnl_units": 0.25, "actual": 1}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910036", "name": "3-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910036", "name": "5-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910036", "name": "8-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910037", "name": "3-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910037", "name": "5-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910037", "name": "8-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910038", "name": "3-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910038", "name": "5-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910038", "name": "8-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910039", "name": "3-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910039", "name": "5-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910039", "name": "8-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910040", "name": "3-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910040", "name": "5-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910040", "name": "8-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}

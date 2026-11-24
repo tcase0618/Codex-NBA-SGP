@@ -1206,3 +1206,13 @@
 {"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910040", "name": "3-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
 {"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910040", "name": "5-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
 {"type": "ticket", "slot": "2026-11-23 19:00ET", "game_id": "401910040", "name": "8-leg", "logged_at": "2026-11-23T23:02:03.669328+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910041", "name": "3-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910041", "name": "5-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910041", "name": "8-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910042", "name": "3-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910042", "name": "5-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910042", "name": "8-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910043", "name": "3-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910043", "name": "5-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "ticket", "slot": "2026-11-23 20:00ET", "game_id": "401910043", "name": "8-leg", "logged_at": "2026-11-24T00:01:55.134077+00:00", "status": "PASS", "note": "engine BLOCKED"}
+{"type": "paper_order", "slot": "2026-11-23 20:00ET", "logged_at": "2026-11-24T00:01:55.134077+00:00", "venue": "polymarket.com (international CLOB, read-only quote)", "executable_for_account": false, "side": "over", "price": 0.53, "units": 1, "game_id": "401910043", "player": "Jabari Smith Jr.", "stat": "pts", "line": 13.5, "ask": 0.53, "proxy_p": 0.7733, "edge": 0.459, "asset_id": "43454235243556240249469960394350073036502475914976505490775274359725780164420", "status": "OPEN"}
